@@ -30,8 +30,10 @@
       }
     },
     methods: {
-      doOpen() {
+      doOpen(e) {
         this.open = true
+        bus.$emit('something-clicked', this)
+        e.stopPropagation()
       },
       close() {
         this.open = false
@@ -42,6 +44,14 @@
 
         bus.$emit('edit-add', this.props.data)
       }
+    },
+    mounted() {
+      bus.$on('something-clicked', (components) => {
+        if (components === this) {
+          return
+        }
+        this.open = false
+      })
     }
   }
 </script>
@@ -49,7 +59,7 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
   .add {
-    z-index: 100;
+    z-index: 1;
     height: 22px;
     opacity: 0;
     /*这里不使用position relative的话， 会出现鼠标移上去会闪，不知道什么原理。*/

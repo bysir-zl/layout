@@ -27,7 +27,7 @@
     margin-left: 0;
   }
 
-  .show-border {
+  .editor .show-border {
     border: 1px dashed rgba(192, 192, 192, 0);
     &:hover {
       border: 1px dashed #999 !important;
@@ -35,7 +35,7 @@
     }
   }
 
-  .on-editor {
+  .editor .editor-padding {
     padding: 8px;
   }
 

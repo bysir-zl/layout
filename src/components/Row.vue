@@ -1,7 +1,7 @@
 <!--行组件, 也就是纵向布局容器, 在编辑模式下, 会出现添加按钮-->
 
 <template>
-  <div :style="style" :class="classes" data-type="row" class="show-border on-editor">
+  <div :style="style" @click="click" :class="classes" data-type="row" class="show-border editor-padding">
     <div v-if="props.children.length===0">
       <div class="container placeholder">
         <component v-for="(item, index) in children" :key="item.id" :is="item.type" :props="item"></component>
@@ -15,6 +15,7 @@
 
 <script>
   import mixin from '../base/mixin.js'
+  import bus from '../event_bus.js'
 
   // data:{widths:[4]}
   export default {
@@ -37,13 +38,18 @@
           t.push(c)
         }
         if (!this.props.children) {
-          console.log(this)
+          console.warn('children is null:', this)
         }
         t.push({'type': 'add', 'data': {'in': this.props.children, index: this.props.children.length}})
         return t
       }
     },
-    methods: {},
+    methods: {
+      click(e) {
+        bus.$emit('something-clicked', this)
+        e.stopPropagation()
+      }
+    },
     mounted() {
 
     },
@@ -51,14 +57,11 @@
   }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
   .placeholder {
     /*border: 1px dashed #dddddd;*/
     /*border-radius: 4px;*/
     padding: 20px 10px;
   }
-
-
 
 </style>

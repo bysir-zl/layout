@@ -1,7 +1,7 @@
 <!--列组件, 也就是横向布局容器-->
 <template>
-  <div class="container self">
-    <div :style="style" :class="classes" class="row show-border on-editor">
+  <div class="container self" @click="click">
+    <div :style="style" :class="classes" class="row show-border editor-padding">
       <div v-for="(item,index) in children" class="col" :class="'col-'+widths[index]">
         <component :is="item.type" :props="item"></component>
       </div>
@@ -12,6 +12,7 @@
 
 <script>
   import mixin from '../base/mixin.js'
+  import bus from '../event_bus.js'
 
   // data:{widths:[4]}
   export default {
@@ -36,7 +37,12 @@
         return t
       }
     },
-    methods: {},
+    methods: {
+      click(e) {
+        bus.$emit('something-clicked', this)
+        e.stopPropagation()
+      }
+    },
     mounted() {
       this.widths = []
       for (let i in this.props.children) {

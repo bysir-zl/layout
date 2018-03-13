@@ -34,6 +34,13 @@
         this.open = true
         bus.$emit('something-clicked', this)
         e.stopPropagation()
+
+        bus.$once('something-clicked', (components) => {
+          if (components === this) {
+            return
+          }
+          this.open = false
+        })
       },
       close() {
         this.open = false
@@ -46,12 +53,7 @@
       }
     },
     mounted() {
-      bus.$on('something-clicked', (components) => {
-        if (components === this) {
-          return
-        }
-        this.open = false
-      })
+
     }
   }
 </script>

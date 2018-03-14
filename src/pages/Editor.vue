@@ -1,7 +1,7 @@
 <template>
   <div @click="click" class="editor">
     <div>editor start</div>
-    <row :props="layout"></row>
+    <strip v-for="(item,index) in layout" :key="index" :props="item"></strip>
     <div>editor end</div>
   </div>
 </template>
@@ -13,9 +13,7 @@
     name: 'HelloWorld',
     data() {
       return {
-        layout: {
-          children: []
-        }
+        layout: []
       }
     },
     methods: {
@@ -35,21 +33,36 @@
       })
     },
     mounted() {
-      this.layout = {
-        children:
-          [
+      this.layout = [
+        {
+          data: {
+            fulled: true,
+          },
+          children: [
             {
               id: 123,
               type: 'z-text',
               data: {
                 text: '<h1>HELLO LAYOUT</h1>'
               },
-              style: {'color': '#800', 'shape': 'o', 'background-color': "#50ae70"}
-
+              style: {'color': '#800', 'shape': 'o', 'background-color': "#eee"}
             },
+          ],
+        },
+        {
+          data: {
+            fulled: false,
+          },
+          children: [
             {
               id: 4,
               type: 'row',
+              data: {
+                fulled: true,
+              },
+              style: {
+                'background-color': "#eee"
+              },
               children: [
                 {
                   id: 3,
@@ -72,7 +85,7 @@
                             text: '<span> i am a childen</span> '
                           },
                           style: {
-                            'background-color': "#4f65ae",
+                            'background-color': "#e2e2e2",
                           }
                         },
                         {
@@ -82,7 +95,7 @@
                             text: '<span> i am a childen3</span> '
                           },
                           style: {
-                            'background-color': "#4f65ae",
+                            'background-color': "#e1e1e1",
                           }
                         },
                       ]
@@ -98,7 +111,7 @@
                             text: '<span> i am a childen2</span> '
                           },
                           style: {
-                            'background-color': "#a46aae"
+                            'background-color': "#e2e2e2"
                           }
                         }
                       ]
@@ -107,82 +120,105 @@
                   ]
                 }
               ],
-            }
-
+            },
           ]
-      }
+        },
+        {
+          data: {
+            fulled: true,
+          },
+          children: [
+            {
+              id: 15,
+              type: 'row',
+              data: {},
+              children: [
+                {
+                  id: 19,
+                  type: 'z-text',
+                  data: {
+                    text: '<h2>end</h2>'
+                  },
+                  style: {'color': '#833', 'background-color': "#eee"}
+                }
+              ]
+            }
+          ]
+
+        }
+      ];
 
       var t = []
       // 生成1k个节点测试性能
 
-      setTimeout(() => {
-        for (let i = 0; i < 200; i++) {
-
-          let item = {
-            // id: 10000 + i,
-            type: 'column',
-            data: {
-              widths: ["lg-4", "", ""], // 4,4,4栅格, 原理是生成的class为: col-${widths[index]}. 使用bootstrap4.0, 所以可以使用如'','sm-4','lg-4'等值
-            },
-            style: {
-              'shape': 'o',
-            },
-            children: [
-              {
-                // id: 20000 + i,
-                type: 'row',
-                children: [
-                  {
-                    id: 4,
-                    type: 'z-text',
-                    data: {
-                      text: '<span> i am a childen</span> '
-                    },
-                    style: {
-                      'background-color': "#4f65ae",
-                    }
-                  },
-                  {
-                    // id: 30000 + i,
-                    type: 'z-text',
-                    data: {
-                      text: '<span> i am a childen3</span> '
-                    },
-                    style: {
-                      'background-color': "#4f65ae",
-                    }
-                  },
-                ]
-              },
-              {
-                // id: 40000 + i,
-                type: 'row',
-                children: [
-                  {
-                    id: 50000 + i,
-                    type: 'z-text',
-                    data: {
-                      text: '<span> i am a childen2</span> '
-                    },
-                    style: {
-                      'background-color': "#a46aae"
-                    }
-                  }
-                ]
-              },
-
-            ]
-          }
-
-
-          t.push(item)
-        }
-
-      }, 1000)
-
-      setTimeout(() => {
-        this.layout.children[1].children = t
-      }, 2000)
+      // setTimeout(() => {
+      //   for (let i = 0; i < 200; i++) {
+      //
+      //     let item = {
+      //       // id: 10000 + i,
+      //       type: 'column',
+      //       data: {
+      //         widths: ["lg-4", "", ""], // 4,4,4栅格, 原理是生成的class为: col-${widths[index]}. 使用bootstrap4.0, 所以可以使用如'','sm-4','lg-4'等值
+      //       },
+      //       style: {
+      //         'shape': 'o',
+      //       },
+      //       children: [
+      //         {
+      //           // id: 20000 + i,
+      //           type: 'row',
+      //           children: [
+      //             {
+      //               id: 4,
+      //               type: 'z-text',
+      //               data: {
+      //                 text: '<span> i am a childen</span> '
+      //               },
+      //               style: {
+      //                 'background-color': "#4f65ae",
+      //               }
+      //             },
+      //             {
+      //               // id: 30000 + i,
+      //               type: 'z-text',
+      //               data: {
+      //                 text: '<span> i am a childen3</span> '
+      //               },
+      //               style: {
+      //                 'background-color': "#4f65ae",
+      //               }
+      //             },
+      //           ]
+      //         },
+      //         {
+      //           // id: 40000 + i,
+      //           type: 'row',
+      //           children: [
+      //             {
+      //               id: 50000 + i,
+      //               type: 'z-text',
+      //               data: {
+      //                 text: '<span> i am a childen2</span> '
+      //               },
+      //               style: {
+      //                 'background-color': "#a46aae"
+      //               }
+      //             }
+      //           ]
+      //         },
+      //
+      //       ]
+      //     }
+      //
+      //
+      //     t.push(item)
+      //   }
+      //
+      // }, 1000)
+      //
+      // setTimeout(() => {
+      //   this.layout.children[1].children = t
+      // }, 2000)
     },
   }
 </script>

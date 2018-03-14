@@ -22,6 +22,11 @@
     padding-left: 0;
   }
 
+  .container-fluid {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
   .row {
     margin-right: 0;
     margin-left: 0;
@@ -31,12 +36,12 @@
     border: 1px dashed rgba(192, 192, 192, 0);
     &:hover {
       border: 1px dashed #999 !important;
-      border-radius: 4px;
+      border-radius: 0px;
     }
   }
 
-  .editor .editor-padding {
-    padding: 8px;
-  }
+  /*.editor .editor-padding {*/
+  /*padding: 8px;*/
+  /*}*/
 
 </style>

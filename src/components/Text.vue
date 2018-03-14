@@ -1,5 +1,5 @@
 <template>
-  <div class="container self" data-comp="text" @click="click" :style="style" :class="classes">
+  <div class="self" data-comp="text" @click="click" :style="style" :class="classes">
     <div v-html="props.data.text" class="data"></div>
     <div class="editor-box" v-if="active">
       <div class="info">text</div>

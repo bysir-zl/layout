@@ -7,6 +7,7 @@ import Text from './components/Text.vue'
 import Row from './components/Row.vue'
 import Column from './components/Column.vue'
 import Add from './components/Add.vue'
+import Strip from './components/Strip.vue'
 
 Vue.config.productionTip = false
 
@@ -15,6 +16,7 @@ Vue.component('z-text', Text)
 Vue.component('row', Row)
 Vue.component('column', Column)
 Vue.component('add', Add)
+Vue.component('strip', Strip)
 
 /* eslint-disable no-new */
 new Vue({

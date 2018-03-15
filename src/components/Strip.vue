@@ -1,7 +1,7 @@
 <!--最外层纵向布局容器, 主要实现两种模式:全宽度,居中 默认为居中-->
 
 <template>
-  <div :style="style" @click="click" :class="css" data-type="row" class="show-border editor-padding">
+  <div :style="style" @click="click" :class="classes" data-type="row" class="show-border editor-padding">
     <div v-if="props.children.length===0">
       <div class=" placeholder">
         <component v-for="(item, index) in children" :key="item.id" :is="item.type" :props="item"></component>
@@ -43,11 +43,11 @@
         t.push({'type': 'add', 'data': {'in': this.props.children, index: this.props.children.length}})
         return t
       },
-      css(){
+      classes(){
         if (this.props.data && this.props.data.fulled){
-          return this.classes.concat(["container-fluid"])
+          return ["container-fluid"]
         }else{
-          return this.classes.concat(["container"])
+          return ["container"]
         }
       }
     },

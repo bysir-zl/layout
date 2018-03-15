@@ -45,7 +45,13 @@
               data: {
                 text: '<h1>HELLO LAYOUT</h1>'
               },
-              style: {'color': '#800', 'shape': 'o', 'background-color': "#eee"}
+              style: {
+                'color': '#800', 'shape': 'o', 'background-color': "#eee",
+                'color:hover': "#f5f", // 如何处理hover的样式?
+                "custom": { // 用户自己输入的样式与类
+                  style: {'color': '#37e'}, classes: []
+                }
+              }
             },
           ],
         },

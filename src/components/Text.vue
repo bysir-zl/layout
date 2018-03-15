@@ -1,5 +1,5 @@
 <template>
-  <div class="self" data-comp="text" @click="click" :style="style" :class="classes">
+  <div class="self" data-comp="text" @click="click" :id="'v-'+props.id" :style="style" :class="classes">
     <div v-html="props.data.text" class="data"></div>
     <div class="editor-box" v-if="active">
       <div class="info">text</div>
@@ -56,6 +56,25 @@
     },
     mounted() {
 
+    },
+    computed: {
+      classes() {
+        return []
+      },
+      style() {
+        if (!this.props.style.custom) {
+          return this.props.style
+        }
+        let name = '#' + 'v-' + this.props.id + ':hover'
+        let css = {'color': '#ff5'}
+        var cssx = document.createElement('style');
+        cssx.type = 'text/css';
+        cssx.innerHTML = name + '{' + 'color:#ff5 !important;' + '}';
+        document.getElementsByTagName('head')[0].appendChild(cssx);
+
+        let r = _.assign(this.props.style, this.props.style.custom.style)
+        return r
+      }
     },
     created() {
 

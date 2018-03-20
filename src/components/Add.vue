@@ -20,7 +20,7 @@
   import bus from '../event_bus'
 
   export default {
-    name: 'HelloWorld',
+    name: 'Add',
     props: [
       'props',
     ],

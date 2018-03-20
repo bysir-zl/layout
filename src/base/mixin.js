@@ -1,18 +1,16 @@
 export default {
   style: {
     data() {
-      return {
-        x_classed: []
-      }
+
     },
     computed: {
       style() {
-        return this.props.style
+        return {}
       },
       classes() {
-        return this.props.style
-      }
-    },
+        return []
+      },
 
+    }
   }
 }

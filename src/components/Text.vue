@@ -5,6 +5,7 @@
       <div class="info">text</div>
       <div class="editor-fixed">
         <div v-html="props.data.text"></div>
+        <div @click="editClick">click</div>
       </div>
     </div>
   </div>
@@ -16,18 +17,23 @@
   //    'style', // 样式, 可自定义或者原生属性
   //    'methods', // 用户自定义事件(js)
 
+  // 由于vue不支持数据驱动css, 所以我们用postcss做一个数据驱动的css:)
+  // <style>也是一个dom, 最小颗粒的就是一个<style>标签. 如果要做增量更新的话只能更新一个<style>
+
   import mixin from '../base/mixin.js'
   import bus from '../event_bus'
+  import cssStore from '../store/css'
 
   export default {
-    name: 'HelloWorld',
+    name: 'VText',
     mixins: [mixin.style],
+    cssStore,
     props: [
       'props',
     ],
     data() {
       return {
-        active: false
+        active: false,
       }
     },
     methods: {
@@ -52,6 +58,13 @@
           }
           this.active = false
         })
+      },
+      editClick() {
+        let key = "#v-" + this.props.id
+        let value = this.props.design.css
+        value["background-color"] = "#f00"
+
+        this.$store.commit("addCss", {key: key, value: value})
       }
     },
     mounted() {
@@ -59,25 +72,34 @@
     },
     computed: {
       classes() {
-        return []
-      },
-      style() {
-        if (!this.props.style.custom) {
-          return this.props.style
+        // 计算要使用的class, 由用户自定义+model得到
+        let base = []
+        if (this.props.design) {
+          if (this.props.design.custom && this.props.design.custom.classes) {
+            base = this.props.design.custom.classes
+          }
+          if (this.props.design.model) {
+            base = base.concat(this.props.design.model)
+          }
         }
-        let name = '#' + 'v-' + this.props.id + ':hover'
-        let css = {'color': '#ff5'}
-        var cssx = document.createElement('style');
-        cssx.type = 'text/css';
-        cssx.innerHTML = name + '{' + 'color:#ff5 !important;' + '}';
-        document.getElementsByTagName('head')[0].appendChild(cssx);
+        return base
+      },
 
-        let r = _.assign(this.props.style, this.props.style.custom.style)
-        return r
+      style() {
+        if (!this.props.design || !this.props.design.custom || !this.props.design.custom.style) {
+          return []
+        }
+
+        return this.props.design.custom.style
       }
     },
     created() {
+      if (!this.props.design || !this.props.design.css) {
+        return ""
+      }
 
+      let key = "#v-" + this.props.id
+      this.$store.commit("addCss", {key: key, value: this.props.design.css})
     }
   }
 </script>
@@ -86,6 +108,7 @@
 <style scoped lang="less">
   .shape-o {
     border: 1px solid #c0009a;
+    border-radius: 4px;
   }
 
   .self {

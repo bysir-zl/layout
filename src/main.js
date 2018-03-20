@@ -8,6 +8,7 @@ import Row from './components/Row.vue'
 import Column from './components/Column.vue'
 import Add from './components/Add.vue'
 import Strip from './components/Strip.vue'
+import store from './store'
 
 Vue.config.productionTip = false
 
@@ -22,6 +23,7 @@ Vue.component('strip', Strip)
 new Vue({
   el: '#app',
   router,
+  store,
   components: {App},
   template: '<App/>'
 })

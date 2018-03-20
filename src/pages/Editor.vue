@@ -17,9 +17,6 @@
       }
     },
     methods: {
-      onEditor(layout) {
-        this.layout = layout
-      },
       click(ele) {
         // console.log(ele.target)
 
@@ -45,13 +42,17 @@
               data: {
                 text: '<h1>HELLO LAYOUT</h1>'
               },
-              style: {
-                'color': '#800', 'shape': 'o', 'background-color': "#eee",
-                'color:hover': "#f5f", // 如何处理hover的样式?
-                "custom": { // 用户自己输入的样式与类
-                  style: {'color': '#37e'}, classes: []
-                }
-              }
+              design: {
+                model: ['shape-o'], // 选定指定好了的类
+                css: { // 用户输入数值, 将会生成到<style>标签里, 使用id作为选择器
+                  'color': '#800',
+                  'background-color': "#eee",
+                  '&:hover': {"color": "#f5f"},
+                },
+                custom: { // 用户自己输入的样式与类, 将原封不动的添加到元素的class和style
+                  // style: {'color': '#37e'}, classes: []
+                },
+              },
             },
           ],
         },
@@ -66,8 +67,10 @@
               data: {
                 fulled: true,
               },
-              style: {
-                'background-color': "#eee"
+              design: {
+                css:{
+                  'background-color': "#eee",
+                }
               },
               children: [
                 {
@@ -76,8 +79,10 @@
                   data: {
                     widths: ["lg-4", "", ""], // 4,4,4栅格, 原理是生成的class为: col-${widths[index]}. 使用bootstrap4.0, 所以可以使用如'','sm-4','lg-4'等值
                   },
-                  style: {
-                    'shape': 'o',
+                  design: {
+                    model:{
+                      'shape': 'o'
+                    }
                   },
                   children: [
                     {
@@ -90,9 +95,11 @@
                           data: {
                             text: '<span> i am a childen</span> '
                           },
-                          style: {
-                            'background-color': "#e2e2e2",
-                          }
+                          design: {
+                            css:{
+                              'background-color': "#e2e2e2"
+                            }
+                          },
                         },
                         {
                           id: 6,
@@ -100,9 +107,11 @@
                           data: {
                             text: '<span> i am a childen3</span> '
                           },
-                          style: {
-                            'background-color': "#e1e1e1",
-                          }
+                          design: {
+                            css:{
+                              'background-color': "#e2e2e2"
+                            }
+                          },
                         },
                       ]
                     },
@@ -116,9 +125,11 @@
                           data: {
                             text: '<span> i am a childen2</span> '
                           },
-                          style: {
-                            'background-color': "#e2e2e2"
-                          }
+                          design: {
+                            css:{
+                              'background-color': "#e2e2e2"
+                            }
+                          },
                         }
                       ]
                     },

@@ -10,7 +10,8 @@ const getters = {}
 
 // mutations
 const mutations = {
-  addCss(state, {key, value}) {
+  // 同一个key只会被添加一次
+  add(state, {key, value}) {
     // 在添加css的时候处理一次, 优化负担
 
     // 这里添加一些变量...
@@ -25,6 +26,7 @@ const mutations = {
 }
 
 export default {
+  namespaced: true,
   state,
   getters,
   mutations

@@ -1,11 +1,12 @@
 <template>
-  <div class="self" data-comp="text" @click="click" :id="'v-'+props.id" :style="style" :class="classes">
-    <div v-html="props.data.text" class="data"></div>
+  <div class="self" data-comp="text" @click="click" :id="'v-'+props.id">
+    <div v-html="props.data.text" class="data" :style="style" :class="classes"></div>
     <div class="editor-box" v-if="active">
       <div class="info">text</div>
       <div class="editor-fixed">
         <div v-html="props.data.text"></div>
-        <div @click="editClick">click</div>
+        <div @click="editClickCss">clickCss</div>
+        <div @click="editClickModel">clickModel</div>
       </div>
     </div>
   </div>
@@ -17,17 +18,13 @@
   //    'style', // 样式, 可自定义或者原生属性
   //    'methods', // 用户自定义事件(js)
 
-  // 由于vue不支持数据驱动css, 所以我们用postcss做一个数据驱动的css:)
-  // <style>也是一个dom, 最小颗粒的就是一个<style>标签. 如果要做增量更新的话只能更新一个<style>
-
   import mixin from '../base/mixin.js'
-  import bus from '../event_bus'
-  import cssStore from '../store/css'
+  import {bus, event} from '../util/event_bus'
+  import obj2array from '../util/obj2array'
 
   export default {
     name: 'VText',
     mixins: [mixin.style],
-    cssStore,
     props: [
       'props',
     ],
@@ -37,83 +34,63 @@
       }
     },
     methods: {
-      '$renderStyle'(key, value, style, classes) {
-        switch (key) {
-          // 对于自定义属性, 我们需要解析成内联style或者class
-          case 'shape':
-            classes.push('shape-' + value)
-            return true
-          default:
-            return false
-        }
-      },
       click(e) {
         this.active = true
-        bus.$emit('something-clicked', this)
+        bus.$emit(event.SomethingClicked, this)
         e.stopPropagation()
 
-        bus.$once('something-clicked', (components) => {
+        bus.$once(event.SomethingClicked, (components) => {
           if (components === this) {
             return
           }
           this.active = false
         })
       },
-      editClick() {
-        let key = "#v-" + this.props.id
+      editClickCss() {
         let value = this.props.design.css
         value["background-color"] = "#f00"
 
-        this.$store.commit("addCss", {key: key, value: value})
-      }
+        this.commitCss({".data": value})
+      },
+      editClickModel() {
+        this.props.design.model.shape = "p"
+      },
+      '$class'() {
+        return obj2array(this.props.design.model, '-')
+      },
+
     },
     mounted() {
 
     },
-    computed: {
-      classes() {
-        // 计算要使用的class, 由用户自定义+model得到
-        let base = []
-        if (this.props.design) {
-          if (this.props.design.custom && this.props.design.custom.classes) {
-            base = this.props.design.custom.classes
-          }
-          if (this.props.design.model) {
-            base = base.concat(this.props.design.model)
-          }
-        }
-        return base
-      },
-
-      style() {
-        if (!this.props.design || !this.props.design.custom || !this.props.design.custom.style) {
-          return []
-        }
-
-        return this.props.design.custom.style
-      }
-    },
+    computed: {},
     created() {
       if (!this.props.design || !this.props.design.css) {
         return ""
       }
-
-      let key = "#v-" + this.props.id
-      this.$store.commit("addCss", {key: key, value: this.props.design.css})
+      this.commitCss({".data": this.props.design.css})
     }
   }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
   .shape-o {
     border: 1px solid #c0009a;
     border-radius: 4px;
   }
 
+  .shape-p {
+    border: 1px solid #88a4c0;
+    border-radius: 10px;
+  }
+
   .self {
-    padding: 3px 6px;
     position: relative;
+  }
+
+  .data {
+    padding: 3px 6px;
+    overflow: hidden;
   }
 
   .editor {
@@ -125,7 +102,6 @@
   }
 
   .editor-box {
-
     position: absolute;
     display: block;
     width: calc(100% + 4px);

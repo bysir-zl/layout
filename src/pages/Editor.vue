@@ -7,7 +7,7 @@
 </template>
 
 <script>
-  import bus from '../event_bus'
+  import {bus,event} from '../util/event_bus'
 
   export default {
     name: 'HelloWorld',
@@ -25,9 +25,7 @@
 
     },
     created() {
-      bus.$on('edit-add', function (data) {
-        console.log(data)
-      })
+
     },
     mounted() {
       this.layout = [
@@ -43,7 +41,7 @@
                 text: '<h1>HELLO LAYOUT</h1>'
               },
               design: {
-                model: ['shape-o'], // 选定指定好了的类
+                model: {'shape': 'o'}, // 选定指定好了的类
                 css: { // 用户输入数值, 将会生成到<style>标签里, 使用id作为选择器
                   'color': '#800',
                   'background-color': "#eee",
@@ -68,7 +66,7 @@
                 fulled: true,
               },
               design: {
-                css:{
+                css: {
                   'background-color': "#eee",
                 }
               },
@@ -80,7 +78,7 @@
                     widths: ["lg-4", "", ""], // 4,4,4栅格, 原理是生成的class为: col-${widths[index]}. 使用bootstrap4.0, 所以可以使用如'','sm-4','lg-4'等值
                   },
                   design: {
-                    model:{
+                    model: {
                       'shape': 'o'
                     }
                   },
@@ -96,7 +94,7 @@
                             text: '<span> i am a childen</span> '
                           },
                           design: {
-                            css:{
+                            css: {
                               'background-color': "#e2e2e2"
                             }
                           },
@@ -108,7 +106,7 @@
                             text: '<span> i am a childen3</span> '
                           },
                           design: {
-                            css:{
+                            css: {
                               'background-color': "#e2e2e2"
                             }
                           },
@@ -126,7 +124,7 @@
                             text: '<span> i am a childen2</span> '
                           },
                           design: {
-                            css:{
+                            css: {
                               'background-color': "#e2e2e2"
                             }
                           },

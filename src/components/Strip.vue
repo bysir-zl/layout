@@ -15,7 +15,7 @@
 
 <script>
   import mixin from '../base/mixin.js'
-  import bus from '../event_bus.js'
+  import {bus,event} from '../util/event_bus'
 
   // data:{fulled:false}
   export default {
@@ -53,7 +53,7 @@
     },
     methods: {
       click(e) {
-        bus.$emit('something-clicked', this)
+        bus.$emit(event.SomethingClicked, this)
         e.stopPropagation()
       }
     },

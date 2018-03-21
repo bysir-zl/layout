@@ -17,7 +17,7 @@
 <script>
   // data:{in,index,must_be}
 
-  import bus from '../event_bus'
+  import {bus,event} from '../util/event_bus'
 
   export default {
     name: 'Add',

@@ -38,7 +38,7 @@
 
 <script>
   import mixin from '../base/mixin.js'
-  import bus from '../event_bus.js'
+  import {bus,event} from '../util/event_bus'
 
   // data:{widths:[4]}
   export default {
@@ -74,13 +74,13 @@
     methods: {
       click(e) {
         e.stopPropagation()
-        bus.$emit('something-clicked', this)
+        bus.$emit(event.SomethingClicked, this)
 
         if (e.target === this.$refs.btn) {
           this.active = true
         }
 
-        bus.$once('something-clicked', (components) => {
+        bus.$once(event.SomethingClicked, (components) => {
           if (components === this) {
             return
           }

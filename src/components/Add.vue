@@ -32,10 +32,10 @@
     methods: {
       doOpen(e) {
         this.open = true
-        bus.$emit('something-clicked', this)
+        bus.$emit(event.SomethingClicked, this)
         e.stopPropagation()
 
-        bus.$once('something-clicked', (components) => {
+        bus.$once(event.SomethingClicked, (components) => {
           if (components === this) {
             return
           }

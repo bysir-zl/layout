@@ -1,49 +1,59 @@
-import processCssJs from "../../util/postcss_js";
+import processCssJs from "./postcss_js";
 
-const MyPlugin = {
+export default {
   install(Vue, options) {
     // 一个app只有一个css集合
-    // 保存所有提交的cssjs
-    Vue.$cssJs = {}
-
-    // 保存渲染后的css
-    Vue.$cssRendered = {}
-
-    // 添加组件css
-    Vue.component('bind-css', {
-      template:
-      '<div>' +
-      '<div v-for="(value,key) in style" :key="key" v-html="value"></div>' +
-      '</div>',
-      name: "BindCss",
-      computed: {
-        style() {
-          return Vue.$cssRendered
+    let status = new Vue({
+      data() {
+        return {
+          // 保存渲染后的css
+          cssRendered: {},
+          // 保存所有提交的cssjs
+          cssJs: {}
         }
       }
     })
 
-    function processCssJsWithRoot(css, root) {
+    // 添加组件css
+    Vue.component('bind-css', {
+      template:
+      '<div class="css">' +
+      '<div v-for="(value,key) in style" :key="key" v-html="value"></div>' +
+      '</div>',
 
-    }
+      name: "BindCss",
+      data() {
+        return {}
+      },
+      computed: {
+        style() {
+          return status.cssRendered
+        }
+      }
+    })
 
     // 添加基本方法
     Vue.prototype.$css = {
-      // 添加, 可通过root传递css变量
-      commit(key, value) {
-        Vue.$cssJs[key] = value
+      // 添加样式, 如给#id1 添加 {color:#fff}, key就是#id1, value就是{"color":"#fff"}
+      add(key, value) {
+        status.cssJs[key] = value
 
         let css = {}
         css[key] = value
 
-        let html = this.renderCssJs(css)
-        Vue.set(Vue.$cssRendered, key, html)
+        let html = this._renderCssJs(css)
+        Vue.set(status.cssRendered, key, html)
       },
       // 设置css变量, 注意设置变量后会重新渲染整个css
-      setRoot(root){
+      setRoot(root) {
         this.root = root
+
+        for (let k in status.cssJs){
+          let v = status.cssJs[k]
+
+        }
       },
-      renderCssJs(css){
+      _renderCssJs(css) {
         if (this.root) {
           css[":root"] = this.root
         }
@@ -53,9 +63,9 @@ const MyPlugin = {
 
       // 重新渲染整个css, 通常是root变量变化了之后需要这样做.
       rebuild(root) {
-        Vue.$cssJs[":root"] = root
+        status.cssJs[":root"] = root
 
-        return "<style>" + processCssJs(Vue.$cssJs) + "</style>"
+        return "<style>" + processCssJs(status.cssJs) + "</style>"
       },
       // 将已经渲染好的css保存到localStorage, 供恢复
       save(version) {
@@ -74,4 +84,3 @@ const MyPlugin = {
 }
 
 
-export default MyPlugin

@@ -1,5 +1,5 @@
 import Vue from "vue"
-import processCssJs from "../util/postcss_js"
+import processCssJs from "../lib/bind-css/postcss_js"
 
 const state = {
   style: {}, // 存放 某个组件对应的<style>标签

@@ -11,7 +11,7 @@ export default {
           return
         }
         let key = "#v-" + this.props.id
-        this.$store.commit("css/add", {key: key, value: value})
+        this.$css.add(key, value)
       }
     },
     computed: {
@@ -36,7 +36,15 @@ export default {
         }
         return base
       },
-
+      // hack, 当props.design.css变化时会自动调用.
+      css() {
+        if (this.props.design) {
+          if (this['$bindCss']) {
+            let c = this['$bindCss'](this.props.design.css)
+            this.commitCss(c)
+          }
+        }
+      }
     }
   }
 }

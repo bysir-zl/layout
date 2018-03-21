@@ -9,6 +9,8 @@
         <div @click="editClickModel">clickModel</div>
       </div>
     </div>
+
+    {{css}}
   </div>
 </template>
 
@@ -53,17 +55,31 @@
         this.commitCss({".data": value})
       },
       editClickModel() {
-        this.props.design.model.shape = "p"
+        let s = _.cloneDeep(this.props)
+        s.design.model['shape'] = 'p'
+
+        bus.$emit(event.ItemChanged, {id: this.props.id, props: s})
       },
       '$class'() {
         return obj2array(this.props.design.model, '-')
       },
+      '$bindCss'(css) {
+        return {".data": css}
+      }
 
     },
     mounted() {
 
     },
     computed: {},
+    watch: {
+      'props.design.model'() {
+        console.log('p1')
+      },
+      'props.design.css'() {
+        console.log('p2')
+      },
+    },
     created() {
       if (!this.props.design || !this.props.design.css) {
         return ""

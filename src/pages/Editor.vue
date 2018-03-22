@@ -21,8 +21,7 @@
     },
     methods: {
       click(ele) {
-        // console.log(ele.target)
-        // bus.$emit('something-clicked', ele.target)
+
       }
     },
     created() {
@@ -77,9 +76,9 @@
       this.$store.commit('view/setView', view)
 
 
-      setTimeout(()=>{
+      setTimeout(() => {
         this.$css.save()
-      },2000)
+      }, 2000)
     },
   }
 </script>

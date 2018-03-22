@@ -83,10 +83,13 @@
     },
 
     watch: {
-      // 为了生成新的css
+      // 在data变化后需要生成新的css
       'data'(n, o) {
-        console.log('text data changed', n, o)
+        if (n === o) {
+          return
+        }
 
+        console.log('text data changed')
 
         if (!this.data.design || !this.data.design.css) {
           return

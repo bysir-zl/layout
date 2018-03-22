@@ -120,21 +120,26 @@
 
         if (deleteCount > 0) {
           // 多余的children删除掉
-          console.log(this.layout.c,deleteCount)
-          for (let i = 0; i < deleteCount; i++) {
+          console.log(this.layout.c, deleteCount)
+          // 不应该在循环中操作与循环相关的变量, 所以用一个列表把要删除的收集起来一起删除
+          let delIds = []
 
+          for (let i = 0; i < deleteCount; i++) {
             let item = this.layout.c[max + i]
-            // this.$store.commit('view/removeItemWithLayout', {parentId: this.id, id: item.i})
+            delIds.push(item.i)
           }
+
+          this.$store.commit('view/removeItemWithLayout', {parentId: this.id, ids:delIds})
+
         } else if (deleteCount < 0) {
           // 添加空row
-          let items = []
+          let newItems = []
           for (let i = 0; i < -deleteCount; i++) {
             let itemId = util.genId()
-            items.push({id: itemId, type: 'row'})
+            newItems.push({id: itemId, type: 'row'})
           }
 
-          this.$store.commit('view/addItemWithLayout', {parentId: this.id, index: childrenCount, items})
+          this.$store.commit('view/addItemWithLayout', {parentId: this.id, index: childrenCount, items: newItems})
         }
       }
     },
@@ -142,8 +147,12 @@
       this.modifyChildren()
     },
     watch: {
-      'data'(n,o) {
-        console.log('column data changed',n,o)
+      'data'(n, o) {
+        // 在view.items变化后, 不知道为什么会触发这个data的改变, 但是新旧是一样的, 所以解决办法就是判断一下.
+        if (n === o) {
+          return
+        }
+        console.log('column data changed')
         this.modifyChildren()
       }
     }

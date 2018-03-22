@@ -28,7 +28,7 @@ function getParent(id, layout) {
 const mutations = {
   // 更新整个items
   updateItem(state, {id, data}) {
-    state.items[id]= data
+    state.items[id] = data
     // Vue.set(state.items, id, data)
   },
   // 设置视图
@@ -42,18 +42,21 @@ const mutations = {
   },
   // 删除元素, 并更新layout
   // 这里不会删除元素的儿子, 元素的儿子会被GC清除掉
-  removeItemWithLayout(state, {parentId, id}) {
-    delete state.items[id]
+  removeItemWithLayout(state, {parentId, ids}) {
+    let parent = getParent(parentId, state.layout)
+    if (!parent) {
+      console.warn("can't found parent(id: " + parentId + "), add item fail")
+      return
+    }
 
-    parent = getParent(parentId, state.layout)
-    if (parent) {
-      let index = _.findIndex(parent.c, ({i}) => {
-        return i === id
-      })
+    for (let i in ids) {
+      let id = ids[i]
+      delete state.items[id]
+
+      let index = _.findIndex(parent.c, ({i}) => i === id)
       if (index >= 0) {
         parent.c.splice(index, 1)
       }
-
     }
   },
   // 添加多个item, 并更新layout

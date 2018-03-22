@@ -1,16 +1,15 @@
 <template>
-  <div class="self" data-comp="text" @click="click" :id="'v-'+props.id">
-    <div v-html="props.data.text" class="data" :style="style" :class="classes"></div>
+  <div class="self" data-comp="text" @click="click" :id="'v-'+data.id">
+    <div v-html="data.data.text" class="data" :style="style" :class="classes"></div>
     <div class="editor-box" v-if="active">
       <div class="info">text</div>
       <div class="editor-fixed">
-        <div v-html="props.data.text"></div>
+        <div v-html="data.data.text"></div>
         <div @click="editClickCss">clickCss</div>
         <div @click="editClickModel">clickModel</div>
+        <div @click="editClickText">editClickText</div>
       </div>
     </div>
-
-    {{css}}
   </div>
 </template>
 
@@ -28,12 +27,15 @@
     name: 'VText',
     mixins: [mixin.style],
     props: [
-      'props',
+      'layout',
     ],
     data() {
       return {
         active: false,
       }
+    },
+    computed: {
+
     },
     methods: {
       click(e) {
@@ -49,42 +51,52 @@
         })
       },
       editClickCss() {
-        let value = this.props.design.css
-        value["background-color"] = "#f00"
-
-        this.commitCss({".data": value})
+        // 请注意要clone一个在修改
+        // 1: 单向数据流
+        // 2: 如果直接在原对象里改, 当commit之后, 由于是同一个对象就不会触发到data的watch
+        let s = _.cloneDeep(this.data)
+        if (!s.design) {
+          s.design = {css: {}}
+        } else if (!s.design.css) {
+          s.design.css = {}
+        }
+        s.design.css["background-color"] = "#f00"
+        this.$store.commit('view/updateItem', {id: this.id, data: s})
       },
       editClickModel() {
-        let s = _.cloneDeep(this.props)
+        let s = _.cloneDeep(this.data)
         s.design.model['shape'] = 'p'
 
-        bus.$emit(event.ItemChanged, {id: this.props.id, props: s})
+        this.$store.commit('view/updateItem', {id: this.id, data: s})
+      },
+      editClickText() {
+        let s = _.cloneDeep(this.data)
+        s.data.text = "hh"
+
+        this.$store.commit('view/updateItem', {id: this.id, data: s})
       },
       '$class'() {
-        return obj2array(this.props.design.model, '-')
+        return obj2array(this.data.design.model, '-')
       },
-      '$bindCss'(css) {
-        return {".data": css}
-      }
 
     },
     mounted() {
 
     },
-    computed: {},
+
     watch: {
-      'props.design.model'() {
-        console.log('p1')
-      },
-      'props.design.css'() {
-        console.log('p2')
-      },
+      'data'() {
+        if (!this.data.design || !this.data.design.css) {
+          return
+        }
+        this.commitCss({".data": this.data.design.css})
+      }
     },
     created() {
-      if (!this.props.design || !this.props.design.css) {
+      if (!this.data.design || !this.data.design.css) {
         return ""
       }
-      this.commitCss({".data": this.props.design.css})
+      this.commitCss({".data": this.data.design.css})
     }
   }
 </script>
@@ -107,14 +119,6 @@
   .data {
     padding: 3px 6px;
     overflow: hidden;
-  }
-
-  .editor {
-    .self {
-      .data {
-        pointer-events: none;
-      }
-    }
   }
 
   .editor-box {

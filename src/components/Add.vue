@@ -6,8 +6,8 @@
     </div>
     <div v-else>
       <div class="add-list">
-        <span @click="add({type: 'row', children: []})">添加行</span>
-        <span @click="add({type: 'column',data:{widths:['','','']}, children: []})">添加列</span>
+        <span @click="add({type: 'row'})">添加行</span>
+        <span @click="add({type: 'column',data:{widths:['','','']}})">添加列</span>
         <span @click="add({type:'z-text',data:{text:'点击编辑'}})">添加文本</span>
       </div>
     </div>
@@ -17,12 +17,13 @@
 <script>
   // data:{in,index,must_be}
 
-  import {bus,event} from '../util/event_bus'
+  import {bus, event} from '../util/event_bus'
+  import util from '../util'
 
   export default {
     name: 'Add',
     props: [
-      'props',
+      'layout',
     ],
     data() {
       return {
@@ -46,10 +47,14 @@
         this.open = false
       },
       add(item) {
-        this.props.data.in.splice(this.props.data.index, 0, item)
-        this.close()
+        item.id = util.genId()
+        this.$store.commit('view/addItemWithLayout', {
+          parentId: this.layout.data.parentId,
+          index: this.layout.data.index,
+          items: [item]
+        })
 
-        bus.$emit('edit-add', this.props.data)
+        this.close()
       }
     },
     mounted() {

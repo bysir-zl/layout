@@ -2,27 +2,27 @@
 
 <template>
   <div :style="style" @click="click" :class="classes" data-type="row" class="show-border editor-padding">
-    <div v-if="props.children.length===0">
+    <div v-if="!layout.c || layout.c.length===0">
       <div class=" placeholder">
-        <component v-for="(item, index) in children" :key="item.id" :is="item.type" :props="item"></component>
+        <component v-for="(item, index) in children" :key="item.id" :is="item.type" :layout="item"></component>
       </div>
     </div>
     <template v-else>
-      <component v-for="(item, index) in children" :key="item.id" :is="item.type" :props="item"></component>
+      <component v-for="(item, index) in children" :key="item.id" :is="item.type" :layout="item"></component>
     </template>
   </div>
 </template>
 
 <script>
   import mixin from '../base/mixin.js'
-  import {bus,event} from '../util/event_bus'
+  import {bus, event} from '../util/event_bus'
 
   // data:{}
   export default {
     name: 'Row',
     mixins: [mixin.style],
     props: [
-      'props',
+      'layout',
     ],
 
     data() {
@@ -31,16 +31,24 @@
     computed: {
       children() {
         let t = []
-        for (let i in this.props.children) {
-          let c = this.props.children[i]
+        for (let index in this.layout.c) {
+          let c = {...this.layout.c[index]}
 
-          t.push({'type': 'add', 'data': {'in': this.props.children, index: parseInt(i)}})
+          // 读取item的type
+          let cid = this.layout.c[index].i
+          let item = this.$store.state.view.items[cid]
+          if (!item) {
+            console.log("item id " + cid + " can't found in items, but it used in layout")
+            continue
+          }
+          c.type = item.type
+
+          t.push({type: 'add', data: {parentId: this.layout.i, index: parseInt(index)}})
           t.push(c)
         }
-        if (!this.props.children) {
-          console.warn('children is null:', this)
-        }
-        t.push({'type': 'add', 'data': {'in': this.props.children, index: this.props.children.length}})
+
+        t.push({type: 'add', data: {parentId: this.layout.i, index: 99999}})
+
         return t
       },
     },

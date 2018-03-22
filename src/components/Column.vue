@@ -3,7 +3,7 @@
   <div class="self show-border editor-padding" @click="click" :style="style" :class="classes">
     <div class="row">
       <div v-for="(item,index) in children" class="col" :class="'col-'+widths[index]">
-        <component :is="item.type" :props="item"></component>
+        <component :is="item.type" :layout="item"></component>
       </div>
     </div>
     <div class="edit" ref="btn">edit column</div>
@@ -38,14 +38,15 @@
 
 <script>
   import mixin from '../base/mixin.js'
-  import {bus,event} from '../util/event_bus'
+  import {bus, event} from '../util/event_bus'
+  import util from '../util'
 
   // data:{widths:[4]}
   export default {
     name: 'Column',
     mixins: [mixin.style],
     props: [
-      'props',
+      'layout',
     ],
     data() {
       return {
@@ -54,21 +55,26 @@
     },
     computed: {
       children() {
-        // 儿子由widths影响, widths有几个就会显示几个,不足填充空column-item
         let t = []
-        let max = this.props.data.widths.length
-        for (let i = 0; i < max; i++) {
-          if (i < this.props.children.length) {
-            t.push(this.props.children[i])
-          } else {
-            t.push({type: 'row', children: []})
+        for (let index in this.layout.c) {
+          let c = {...this.layout.c[index]}
+
+          // 读取item的type
+          let cid = this.layout.c[index].i
+          let item = this.$store.state.view.items[cid]
+          if (!item) {
+            console.log("item id " + cid + " can't found in items, but it used in layout")
+            continue
           }
+          c.type = item.type
+
+          t.push(c)
         }
 
         return t
       },
       widths() {
-        return this.props.data.widths
+        return this.data.data.widths
       }
     },
     methods: {
@@ -94,12 +100,50 @@
         for (let i = 0; i < num; i++) {
           t.push("")
         }
-        this.props.data.widths = t
+        let s = _.cloneDeep(this.data)
+        if (!s.data) {
+          s.data = {widths: t}
+        } else {
+          s.data.widths = t
+        }
+
+        this.$store.commit('view/updateItem', {id: this.id, data: s})
+      },
+      modifyChildren() {
+        // 根据width修改儿子
+        let max = 0
+        if (this.data.data && this.data.data.widths) {
+          max = this.data.data.widths.length
+        }
+        let childrenCount = this.layout.c ? this.layout.c.length : 0
+        let deleteCount = childrenCount - max
+
+        if (deleteCount > 0) {
+          // 多余的children删除掉
+          for (let i = 0; i < deleteCount; i++) {
+            let item = this.layout.c[max + i]
+            this.$store.commit('view/removeItemWithLayout', {parentId: this.id, id: item.i})
+          }
+        } else if (deleteCount < 0) {
+          // 添加空row
+          let items = []
+          for (let i = 0; i < -deleteCount; i++) {
+            let itemId = util.genId()
+            items.push({id: itemId, type: 'row'})
+          }
+
+          this.$store.commit('view/addItemWithLayout', {parentId: this.id, index: childrenCount, items})
+        }
       }
     },
     mounted() {
-
+      this.modifyChildren()
     },
+    watch: {
+      'data'() {
+        this.modifyChildren()
+      }
+    }
 
   }
 </script>

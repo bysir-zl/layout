@@ -11,6 +11,8 @@ import Add from './components/Add.vue'
 import Strip from './components/Strip.vue'
 import store from './store'
 
+require('lodash')
+
 Vue.config.productionTip = false
 
 // 将组件定义在全局, 这样各个递归组件才能方便的使用

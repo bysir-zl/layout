@@ -120,9 +120,11 @@
 
         if (deleteCount > 0) {
           // 多余的children删除掉
+          console.log(this.layout.c,deleteCount)
           for (let i = 0; i < deleteCount; i++) {
+
             let item = this.layout.c[max + i]
-            this.$store.commit('view/removeItemWithLayout', {parentId: this.id, id: item.i})
+            // this.$store.commit('view/removeItemWithLayout', {parentId: this.id, id: item.i})
           }
         } else if (deleteCount < 0) {
           // 添加空row
@@ -140,7 +142,8 @@
       this.modifyChildren()
     },
     watch: {
-      'data'() {
+      'data'(n,o) {
+        console.log('column data changed',n,o)
         this.modifyChildren()
       }
     }

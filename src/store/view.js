@@ -28,7 +28,8 @@ function getParent(id, layout) {
 const mutations = {
   // 更新整个items
   updateItem(state, {id, data}) {
-    Vue.set(state.items, id, data)
+    state.items[id]= data
+    // Vue.set(state.items, id, data)
   },
   // 设置视图
   setView(state, {layout, items}) {

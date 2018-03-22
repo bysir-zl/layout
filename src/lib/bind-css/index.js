@@ -41,19 +41,19 @@ export default {
         let css = {}
         css[key] = value
 
-        let html = this._renderCssJs(css)
+        let html = this._renderCssJsItem(css)
         Vue.set(status.cssRendered, key, html)
       },
       // 设置css变量, 注意设置变量后会重新渲染整个css
       setRoot(root) {
         this.root = root
 
-        for (let k in status.cssJs){
+        for (let k in status.cssJs) {
           let v = status.cssJs[k]
-
+          // todo
         }
       },
-      _renderCssJs(css) {
+      _renderCssJsItem(css) {
         if (this.root) {
           css[":root"] = this.root
         }
@@ -62,14 +62,14 @@ export default {
       },
 
       // 重新渲染整个css, 通常是root变量变化了之后需要这样做.
-      rebuild(root) {
-        status.cssJs[":root"] = root
-
-        return "<style>" + processCssJs(status.cssJs) + "</style>"
+      rebuild() {
+        return this._renderCssJsItem(status.cssJs)
       },
       // 将已经渲染好的css保存到localStorage, 供恢复
       save(version) {
-
+        let x = this.rebuild()
+        console.log(x)
+        localStorage.setItem("bind-css-style", x)
       },
       // 获取最后一次保存的版本, 方便对比是否需要更新
       getLastSaveVersion() {

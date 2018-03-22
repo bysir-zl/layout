@@ -76,6 +76,10 @@
 
       this.$store.commit('view/setView', view)
 
+
+      setTimeout(()=>{
+        this.$css.save()
+      },2000)
     },
   }
 </script>

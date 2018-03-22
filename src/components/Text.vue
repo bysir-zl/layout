@@ -34,9 +34,7 @@
         active: false,
       }
     },
-    computed: {
-
-    },
+    computed: {},
     methods: {
       click(e) {
         this.active = true
@@ -85,12 +83,16 @@
     },
 
     watch: {
-      'data'() {
+      // 为了生成新的css
+      'data'(n, o) {
+        console.log('text data changed', n, o)
+
+
         if (!this.data.design || !this.data.design.css) {
           return
         }
         this.commitCss({".data": this.data.design.css})
-      }
+      },
     },
     created() {
       if (!this.data.design || !this.data.design.css) {

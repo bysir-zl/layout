@@ -41,7 +41,7 @@ export default {
         return this.layout.i
       },
       data() {
-        return this.$store.state.view.items[this.layout.i]
+        return this.$store.state.view.items[this.id]
       },
     }
   }

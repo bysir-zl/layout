@@ -63,6 +63,11 @@
       },
       editClickModel() {
         let s = _.cloneDeep(this.data)
+        if (!s.design) {
+          s.design = {model: {}}
+        } else if (!s.design.model) {
+          s.design.model = {}
+        }
         s.design.model['shape'] = 'p'
 
         this.$store.commit('view/updateItem', {id: this.id, data: s})

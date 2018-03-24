@@ -9,7 +9,8 @@ export default {
           // 保存渲染后的css
           cssRendered: {},
           // 保存所有提交的cssjs
-          cssJs: {}
+          cssJs: {},
+          cssAll: '',
         }
       }
     })
@@ -18,6 +19,7 @@ export default {
     Vue.component('bind-css', {
       template:
       '<div class="css">' +
+      '<div v-html="cssAll"></div>' +
       '<div v-for="(value,key) in style" :key="key" v-html="value"></div>' +
       '</div>',
 
@@ -28,14 +30,23 @@ export default {
       computed: {
         style() {
           return status.cssRendered
+        },
+        cssAll() {
+          return status.cssAll
         }
       }
     })
 
     // 添加基本方法
     Vue.prototype.$css = {
+      locked: false,
+
       // 添加样式, 如给#id1 添加 {color:#fff}, key就是#id1, value就是{"color":"#fff"}
       add(key, value) {
+        if (this.locked) {
+          return
+        }
+
         status.cssJs[key] = value
 
         let css = {}
@@ -46,11 +57,16 @@ export default {
       },
       // 设置css变量, 注意设置变量后会重新渲染整个css
       setRoot(root) {
+        if (this.locked) {
+          return
+        }
         this.root = root
 
         for (let k in status.cssJs) {
-          let v = status.cssJs[k]
-          // todo
+          let css = {}
+          css[k] = status.cssJs[k]
+          let html = this._renderCssJsItem(css)
+          Vue.set(status.cssRendered, k, html)
         }
       },
       _renderCssJsItem(css) {
@@ -61,23 +77,32 @@ export default {
         return "<style>" + processCssJs(css) + "</style>"
       },
 
-      // 重新渲染整个css, 通常是root变量变化了之后需要这样做.
-      rebuild() {
+      // 生成一个大的css
+      buildAdd() {
         return this._renderCssJsItem(status.cssJs)
       },
       // 将已经渲染好的css保存到localStorage, 供恢复
       save(version) {
-        let x = this.rebuild()
-        console.log(x)
-        localStorage.setItem("bind-css-style", x)
+        let x = this.buildAdd()
+        localStorage.setItem("bind-css-css", x)
+        localStorage.setItem("bind-css-version", version)
       },
       // 获取最后一次保存的版本, 方便对比是否需要更新
       getLastSaveVersion() {
-
+        return localStorage.getItem("bind-css-version")
       },
       // 将保存的css恢复到dom上, 减少处理的时间
+      // 一般来说, restore使用在不需要add代码的时候, 所以为了防止性能消耗, 应当与lock一同使用
       restore() {
-
+        status.cssAll = localStorage.getItem("bind-css-css")
+      },
+      // 锁定css, 锁定后不能再add
+      lock() {
+        this.locked = true
+      },
+      // 解锁
+      unlock() {
+        this.locked = false
       }
     }
   }

@@ -46,6 +46,12 @@ export default {
         if (this.locked) {
           return
         }
+        if (status.cssJs[key]) {
+          // 如果存在并且一样, 就不计算
+          if (_.isEqual(status.cssJs[key], value)) {
+            return
+          }
+        }
 
         status.cssJs[key] = value
 

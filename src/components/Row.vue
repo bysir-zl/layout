@@ -54,8 +54,8 @@
     },
     methods: {
       click(e) {
-        bus.$emit(event.SomethingClicked, this)
-        e.stopPropagation()
+//        bus.$emit(event.SomethingClicked, this)
+//        e.stopPropagation()
       }
     },
     mounted() {

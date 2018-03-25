@@ -1,0 +1,240 @@
+<template>
+  <div>
+    <div class="editor-box">
+      <div class="info">column</div>
+    </div>
+    <div class="editor-fixed">
+      <div class="mask"></div>
+      <div class="head">
+        {{title}}
+        <div class="button-content button-close" @click="close">
+          <svg width="25" height="25" viewBox="0 0 25 25">
+            <path
+              d="M11.793 12.5L8.146 8.854 7.793 8.5l.707-.707.354.353 3.646 3.647 3.646-3.647.354-.353.707.707-.353.354-3.647 3.646 3.647 3.646.353.354-.707.707-.354-.353-3.646-3.647-3.646 3.647-.354.353-.707-.707.353-.354 3.647-3.646z"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="body">
+        <div v-for="(v,k) in config">
+          <label>{{v.label}}</label>
+          <div v-if="v.type==='fullText'">
+            <textarea v-model="tempData[k]" @input="input"></textarea>
+          </div>
+          <div v-else-if="v.type==='color'">
+            <input v-model="tempData[k]" @input="input"/>
+          </div>
+          <div v-else-if="v.type==='enum'">
+            <select v-model="tempData[k]" @input="input">
+              <option v-for="i in v.options" :name="i.label" :value="i.value">{{i.label}}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <button @click="save">保存</button>
+        <button @click="reset">还原</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  // data:{config:{
+  //  data
+  // },data:{}}
+
+  import {bus, event} from '../util/event_bus'
+  import util from '../util'
+
+  export default {
+    name: 'EditBox',
+    props: [
+      'data', // 要修改的数据
+      'config',// 数据类型
+      'title',
+    ],
+    data() {
+      return {
+        tempData: {},
+        oldData: {},
+        lastSaveData: {},
+      }
+    },
+    methods: {
+      input() {
+        // 这里settimeout是英文在部分控件触发@input="input"的时候, v-model还没来得及改变
+        setTimeout(() => {
+          let x = this.tranDataZ(this.tempData)
+          this.$emit('input', x)
+        }, 10)
+      },
+      save() {
+        let x = this.tranDataZ(this.tempData)
+        this.lastSaveData = x
+
+        this.$emit('input', x)
+      },
+      reset() {
+        this.$emit('input', this.oldData)
+
+        this.tempData = this.tranData(this.oldData)
+      },
+      tranData(x) {
+        let y = {}
+
+        for (let k in this.config) {
+          let v = this.config[k]
+          y[k] = eval('x.' + k)
+        }
+
+        return y
+      },
+      tranDataZ(src) {
+        let x = _.cloneDeep(this.data)
+        for (let k in this.config) {
+          let v = this.config[k]
+          eval('x.' + k + ' = this.tempData[\'' + k + '\']')
+        }
+
+        return x
+      },
+      cancel() {
+        this.$emit('input', this.lastSaveData)
+      },
+      close() {
+        this.cancel()
+        this.$emit('close', false)
+      },
+      editClickCss() {
+        // 请注意要clone一个在修改
+        // 1: 单向数据流
+        // 2: 如果直接在原对象里改, 当commit之后, 由于是同一个对象就不会触发到data的watch
+        let s = _.cloneDeep(this.data)
+        if (!s.design) {
+          s.design = {css: {}}
+        } else if (!s.design.css) {
+          s.design.css = {}
+        }
+        s.design.css["background-color"] = "#f00"
+        this.$emit('input', s)
+      },
+      editClickModel() {
+        let s = _.cloneDeep(this.data)
+        if (!s.design) {
+          s.design = {model: {}}
+        } else if (!s.design.model) {
+          s.design.model = {}
+        }
+        s.design.model['shape'] = 'p'
+
+        this.$emit('input', s)
+
+      },
+      editClickText() {
+        let s = _.cloneDeep(this.data)
+        s.data.text = "hh"
+
+        this.$emit('input', s)
+      },
+    },
+    watch: {
+      'active'() {
+        if (this.active) {
+
+        }
+      }
+    },
+    mounted() {
+      // 将当前数据copy一份
+      this.oldData = this.data
+      this.lastSaveData = _.cloneDeep(this.data)
+
+      this.tempData = this.tranData(this.data)
+    }
+  }
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="less">
+  .editor-box {
+    position: absolute;
+    display: block;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    top: -2px;
+    left: -2px;
+    pointer-events: none;
+
+    border: 1px solid #64a4ff;
+    .info {
+      position: absolute;
+      background-color: #64a4ff;
+      font-size: 13px;
+      height: 15px;
+      line-height: 15px;
+      top: -15px;
+      left: -1px;
+      border-radius: 0;
+      padding: 0 4px;
+      color: #fff;
+    }
+  }
+
+  .editor-fixed {
+    position: fixed;
+    right: 50px;
+    top: 50px;
+    width: 330px;
+    height: 600px;
+    overflow-y: auto;
+    background-color: #fff;
+    z-index: 100;
+
+    box-shadow: 0 0 18px 0 rgba(22, 45, 61, 0.27);
+    border-radius: 10px;
+    .mask {
+      z-index: -1;
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .head {
+      padding: 10px;
+      background-color: #64a4ff;
+      color: #fff;
+      .button-close {
+        cursor: pointer;
+        background-color: #4e7dc5;
+        border-radius: 999px;
+        float: right;
+        height: 25px;
+        svg {
+          fill: #fff;
+        }
+      }
+    }
+    .body {
+      padding: 10px;
+      .num {
+        > span {
+          display: inline-block;
+          background-color: rgba(100, 164, 255, 0.6);
+          color: #fff;
+          width: 20px;
+          height: 20px;
+          font-size: 12px;
+          line-height: 20px;
+          text-align: center;
+        }
+      }
+    }
+    .footer {
+      padding: 10px;
+
+    }
+  }
+
+</style>

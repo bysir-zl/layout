@@ -40,8 +40,13 @@ export default {
       id() {
         return this.layout.i
       },
-      data() {
-        return this.$store.state.view.items[this.id]
+      data: {
+        get() {
+          return this.$store.state.view.items[this.id]
+        },
+        set(v) {
+          this.$store.commit('view/updateItem', {id: v.id, data: v})
+        }
       },
     }
   }

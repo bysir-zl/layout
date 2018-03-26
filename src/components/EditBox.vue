@@ -26,6 +26,22 @@
             <div v-else-if="v.type==='color'">
               <el-input v-model="tempData[k]" @input="input"></el-input>
             </div>
+            <div v-else-if="v.type==='background'">
+              <el-radio v-model="tempData[k].type"
+                        label="color" @input="input">颜色
+              </el-radio>
+              <el-radio v-model="tempData[k].type"
+                        label="img" @input="input">图片
+              </el-radio>
+              <el-radio v-model="tempData[k].type"
+                        label="video" @input="input">视频
+              </el-radio>
+
+
+              <el-input v-if="tempData[k].type==='video'" v-model="tempData[k].video" @input="input"></el-input>
+              <el-input v-else-if="tempData[k].type==='img'" v-model="tempData[k].img" @input="input"></el-input>
+              <el-input v-else-if="tempData[k].type==='color'" v-model="tempData[k].color" @input="input"></el-input>
+            </div>
             <div v-else-if="v.type==='enum'">
               <el-radio
                 v-for="i in v.options"
@@ -59,10 +75,11 @@
     ],
     data() {
       return {
-        tempData: {},
+        tempData: {empty: true},
         oldData: {},
         lastSaveData: {},
         x: 'o',
+        bg: {},
       }
     },
     methods: {
@@ -80,6 +97,7 @@
         this.$emit('input', x)
       },
       reset() {
+        console.log("reset")
         this.$emit('input', this.oldData)
 
         this.tempData = this.tranData(this.oldData)
@@ -97,7 +115,7 @@
       tranDataZ(src) {
         let x = _.cloneDeep(this.data)
         for (let k in this.config) {
-          this.setValue(x,k,this.tempData[k])
+          this.setValue(x, k, this.tempData[k])
         }
 
         return x
@@ -175,9 +193,9 @@
         }
       }
     },
-    mounted() {
+    created() {
       // 将当前数据copy一份
-      this.oldData = this.data
+      this.oldData = _.cloneDeep(this.data)
       this.lastSaveData = _.cloneDeep(this.data)
 
       this.tempData = this.tranData(this.data)

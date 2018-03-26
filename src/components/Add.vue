@@ -1,5 +1,5 @@
 <template>
-  <div class="add container" :class="{'add-open':open}">
+  <div class="add " :class="{'add-open':open}">
     <div v-if="!open">
       <div class="line"></div>
       <span class="tips" @click="doOpen">点我添加东西</span>
@@ -23,7 +23,7 @@
   export default {
     name: 'Add',
     props: [
-      'layout',
+      'data',
     ],
     data() {
       return {
@@ -49,8 +49,8 @@
       add(item) {
         item.id = util.genId()
         this.$store.commit('view/addItemWithLayout', {
-          parentId: this.layout.data.parentId,
-          index: this.layout.data.index,
+          parentId: this.data.data.parentId,
+          index: this.data.data.index,
           items: [item]
         })
 
@@ -81,6 +81,7 @@
       background-color: #111;
       height: 6px;
       border-radius: 2px;
+      pointer-events: none;
     }
     .tips {
       cursor: pointer;

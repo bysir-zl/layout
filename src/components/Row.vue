@@ -2,13 +2,13 @@
 
 <template>
   <div :style="style" @click="click" :class="classes" data-type="row" class="show-border editor-padding">
-    <div v-if="!layout.c || layout.c.length===0">
+    <div v-if="!data.children || data.children.length===0">
       <div class=" placeholder">
-        <component v-for="(item, index) in children" :key="item.id" :is="item.type" :layout="item"></component>
+        <component v-for="(item, index) in children" :key="item.id" :is="item.type" :data="item"></component>
       </div>
     </div>
     <template v-else>
-      <component v-for="(item, index) in children" :key="item.id" :is="item.type" :layout="item"></component>
+      <component v-for="(item, index) in children" :key="item.id" :is="item.type" :data="item"></component>
     </template>
   </div>
 </template>
@@ -22,7 +22,7 @@
     name: 'Row',
     mixins: [mixin.style],
     props: [
-      'layout',
+      'data',
     ],
 
     data() {
@@ -31,23 +31,15 @@
     computed: {
       children() {
         let t = []
-        for (let index in this.layout.c) {
-          let c = {...this.layout.c[index]}
+        for (let index in this.data.children) {
 
-          // 读取item的type
-          let cid = this.layout.c[index].i
-          let item = this.$store.state.view.items[cid]
-          if (!item) {
-            console.log("item id " + cid + " can't found in items, but it used in layout")
-            continue
-          }
-          c.type = item.type
+          let item = this.data.children[index]
 
-          t.push({type: 'add', data: {parentId: this.layout.i, index: parseInt(index)}})
-          t.push(c)
+          t.push({type: 'add', data: {parentId: this.id, index: parseInt(index)}})
+          t.push(item)
         }
 
-        t.push({type: 'add', data: {parentId: this.layout.i, index: 99999}})
+        t.push({type: 'add', data: {parentId: this.id, index: 99999}})
 
         return t
       },

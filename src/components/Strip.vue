@@ -1,14 +1,14 @@
 <!--最外层纵向布局容器, 主要实现两种模式:全宽度,居中 默认为居中-->
 
 <template>
-  <div :style="style" @click="click" :class="classes" data-type="row" class="show-border editor-padding">
-    <div v-if="layout.c.length===0">
+  <div :style="style" @click="click" :class="classes" data-type="strip" class="show-border editor-padding">
+    <div v-if="data.children.length===0">
       <div class=" placeholder">
-        <component v-for="(item, index) in children" :key="item.id" :is="item.type" :layout="item"></component>
+        <component v-for="(item, index) in children" :key="item.id" :is="item.type" :data="item"></component>
       </div>
     </div>
     <template v-else>
-      <component v-for="(item, index) in children" :key="item.id" :is="item.type" :layout="item"></component>
+      <component v-for="(item, index) in children" :key="item.id" :is="item.type" :data="item"></component>
     </template>
   </div>
 </template>
@@ -22,38 +22,23 @@
     name: 'Strip',
     mixins: [mixin.style],
     props: [
-      'layout',
+      'data',
     ],
 
     data() {
       return {}
     },
     computed: {
-      id() {
-        return this.layout.i
-      },
-      data() {
-        return this.$store.state.view.items[this.layout.i]
-      },
       children() {
         let t = []
-        for (let index in this.layout.c) {
-          let c = {...this.layout.c[index]}
+        for (let index in this.data.children) {
+          let item =this.data.children[index]
 
-          // 读取item的type
-          let cid = this.layout.c[index].i
-          let item = this.$store.state.view.items[cid]
-          if (!item) {
-            console.log("item id " + cid + " can't found in items, but it used in layout")
-            continue
-          }
-          c.type = item.type
-
-          t.push({'type': 'add', 'data': {parentId: this.layout.i, index: parseInt(index)}})
-          t.push(c)
+          t.push({'type': 'add', 'data': {parentId: this.id, index: parseInt(index)}})
+          t.push(item)
         }
 
-        t.push({'type': 'add', 'data': {parentId: this.layout.i, index: this.layout.c.length}})
+        t.push({'type': 'add', 'data': {parentId: this.id, index: this.data.children.length}})
 
         return t
       },

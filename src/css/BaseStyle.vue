@@ -44,4 +44,16 @@
   /*padding: 8px;*/
   /*}*/
 
+  .video-bg {
+    position: absolute;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    z-index: -2;
+  }
 </style>

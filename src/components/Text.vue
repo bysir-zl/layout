@@ -1,6 +1,10 @@
 <template>
   <div class="self" data-comp="text" :id="'v-'+data.id">
-    <div v-html="data.data.text" class="data" :style="style" :class="classes" @click="click"></div>
+    <div class="data" :style="style" :class="classes" @click="click">
+      <div v-html="data.data.text"></div>
+      <video v-if="data.design.advanced.background&&data.design.advanced.background.type === 'video'"
+             class="video-bg" loop autoplay :src="data.design.advanced.background.video"></video>
+    </div>
     <edit-box v-if="active" @close="active=false" :data="data" :config="editConfig" title="text"
               @input="onEdit"></edit-box>
   </div>
@@ -20,7 +24,7 @@
     name: 'VText',
     mixins: [mixin.style],
     props: [
-      'layout',
+      'data',
     ],
     data() {
       return {
@@ -30,9 +34,9 @@
             label: '文本',
             type: 'fullText'
           },
-          'design.css["background-color"]': {
-            label: '背景颜色',
-            type: 'color'
+          'design.advanced.background': {
+            label: '背景',
+            type: 'background'
           },
           'design.css["padding"]': {
             label: 'padding',
@@ -61,7 +65,8 @@
               value: 'o',
             }]
           },
-        }
+        },
+
       }
     },
     computed: {},
@@ -80,13 +85,34 @@
       },
 
       onEdit(s) {
+        Object.assign(this.data,s)
+//        this.data = s
 
-        this.data = s
+        this.reRender()
       },
       '$class'() {
         return obj2array(this.data.design.model, '-')
       },
+      // 重新渲染, 一般在data改变后操作
+      reRender(){
+        this.processCss()
+      },
 
+      processCss() {
+        if (!this.data.design || !this.data.design.css) {
+          return
+        }
+        // 处理高级样式
+        let x = _.cloneDeep(this.data.design.css)
+        if (this.data.design.advanced) {
+          if (this.data.design.advanced.background.type === 'img') {
+            x.background = 'url(' + this.data.design.advanced.background.img + ')'
+          } else if (this.data.design.advanced.background.type === 'color') {
+            x.background = this.data.design.advanced.background.color
+          }
+        }
+        this.commitCss({".data": x})
+      }
     },
     mounted() {
 
@@ -100,18 +126,11 @@
         }
 
         console.log('text data changed')
-
-        if (!this.data.design || !this.data.design.css) {
-          return
-        }
-        this.commitCss({".data": this.data.design.css})
+        this.reRender()
       },
     },
     created() {
-      if (!this.data.design || !this.data.design.css) {
-        return ""
-      }
-      this.commitCss({".data": this.data.design.css})
+      this.reRender()
     }
   }
 </script>
@@ -129,6 +148,7 @@
   .data {
     padding: 3px 6px;
     overflow: hidden;
+    position: relative;
   }
 
 

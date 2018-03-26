@@ -8,13 +8,11 @@
 
 <script>
   import BaseStyle from './css/BaseStyle.vue'
-  import Css from './css/Css.vue'
 
   export default {
     name: 'App',
     components: {
       'base-style': BaseStyle,
-      'css': Css,
     }
   }
 </script>

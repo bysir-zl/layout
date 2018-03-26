@@ -38,16 +38,16 @@ export default {
       },
 
       id() {
-        return this.layout.i
+        return this.data.id
       },
-      data: {
-        get() {
-          return this.$store.state.view.items[this.id]
-        },
-        set(v) {
-          this.$store.commit('view/updateItem', {id: v.id, data: v})
-        }
-      },
+      // data: {
+      //   get() {
+      //     return this.$store.state.view.items[this.id]
+      //   },
+      //   set(v) {
+      //     this.$store.commit('view/updateItem', {id: v.id, data: v})
+      //   }
+      // },
     }
   }
 }

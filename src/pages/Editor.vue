@@ -90,13 +90,6 @@
       // 嵌套结构时 组件自己管理自己的儿子, 不需要维护一个全局对象存放items
       // 当需要做复用组件的时候, 原数据结构不太方便, 因为又需要将复用的组件items放在全局对象里面
 
-      // 处理这个数据
-      let view = {
-        id: page.id,
-        data: page.data,
-        design: page.design,
-        children: []
-      }
 
       function collectChildren(layout, items) {
         let c = []
@@ -113,10 +106,17 @@
         return c
       }
 
-      view.children = collectChildren(page.c, page.items)
-
+      // 处理这个数据
+      let view = {
+        id: page.id,
+        data: page.data,
+        design: page.design,
+        children: collectChildren(page.c, page.items)
+      }
 
       this.data = view
+
+      // 为什么不用vuex做单向数据流, 因为在这项目中, 其实没有父组件管理子组件的概念, 组件应该自己管理自己. 如果做单向数据流就有点得不偿失
 
 
       setTimeout(() => {

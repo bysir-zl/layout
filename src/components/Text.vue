@@ -15,10 +15,8 @@
   import mixin from '../base/mixin.js'
   import {bus, event} from '../util/event_bus'
   import obj2array from '../util/obj2array'
-  import EditBox from "./EditBox.vue";
 
   export default {
-    components: {EditBox},
     name: 'VText',
     mixins: [mixin.style],
     props: [
@@ -45,7 +43,11 @@
             type: 'color'
           },
           'design.css["color"]': {
-            label: 'color',
+            label: '字体颜色',
+            type: 'color'
+          },
+          'design.css["&:hover"].color': {
+            label: 'hover字体颜色',
             type: 'color'
           },
           'design.model.shape': {
@@ -53,7 +55,7 @@
             type: 'enum',
             options: [{
               label: '普通',
-              value: '',
+              value: '-',
             }, {
               label: '圆形',
               value: 'o',

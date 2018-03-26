@@ -8,9 +8,8 @@
     </div>
     <div class="edit" ref="btn">edit column</div>
 
-    <div v-if="active">
-
-    </div>
+    <edit-box v-if="active" @close="active=false" :data="data" :config="editConfig" title="column"
+              @input="onEdit"></edit-box>
   </div>
 </template>
 
@@ -29,11 +28,27 @@
     data() {
       return {
         active: false,
+        editConfig: {
+          'data.widths': {
+            label: '列数',
+            type: 'enum',
+            options: [{
+              label: '1',
+              value: [''],
+            }, {
+              label: '2',
+              value: ['',''],
+            }]
+          },
+        }
       }
     },
     computed: {
       children() {
         let t = []
+        if (this.data.widths.length!==this.layout.c.length){
+
+        }
         for (let index in this.layout.c) {
           let c = {...this.layout.c[index]}
 
@@ -57,12 +72,13 @@
     },
     methods: {
       click(e) {
-        e.stopPropagation()
-        bus.$emit(event.SomethingClicked, this)
-
-        if (e.target === this.$refs.btn) {
-          this.active = true
+        if (e.target !== this.$refs.btn) {
+          return
         }
+        e.stopPropagation()
+
+        this.active = true
+        bus.$emit(event.SomethingClicked, this)
 
         bus.$once(event.SomethingClicked, (components) => {
           if (components === this) {
@@ -72,7 +88,9 @@
         })
 
       },
-
+      onEdit(s) {
+        this.data = s
+      },
       setNum(num) {
         let t = []
         for (let i = 0; i < num; i++) {
@@ -97,17 +115,17 @@
         let deleteCount = childrenCount - max
 
         if (deleteCount > 0) {
-          // 多余的children删除掉
-          console.log(this.layout.c, deleteCount)
-          // 不应该在循环中操作与循环相关的变量, 所以用一个列表把要删除的收集起来一起删除
-          let delIds = []
-
-          for (let i = 0; i < deleteCount; i++) {
-            let item = this.layout.c[max + i]
-            delIds.push(item.i)
-          }
-
-          this.$store.commit('view/removeItemWithLayout', {parentId: this.id, ids:delIds})
+          // // 多余的children删除掉
+          // console.log(this.layout.c, deleteCount)
+          // // 不应该在循环中操作与循环相关的变量, 所以用一个列表把要删除的收集起来一起删除
+          // let delIds = []
+          //
+          // for (let i = 0; i < deleteCount; i++) {
+          //   let item = this.layout.c[max + i]
+          //   delIds.push(item.i)
+          // }
+          //
+          // this.$store.commit('view/removeItemWithLayout', {parentId: this.id, ids: delIds})
 
         } else if (deleteCount < 0) {
           // 添加空row

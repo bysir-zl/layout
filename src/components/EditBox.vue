@@ -1,38 +1,45 @@
 <template>
   <div>
     <div class="editor-box">
-      <div class="info">column</div>
+      <div class="info">{{title}}</div>
     </div>
     <div class="editor-fixed">
       <div class="mask"></div>
-      <div class="head">
-        {{title}}
-        <div class="button-content button-close" @click="close">
-          <svg width="25" height="25" viewBox="0 0 25 25">
-            <path
-              d="M11.793 12.5L8.146 8.854 7.793 8.5l.707-.707.354.353 3.646 3.647 3.646-3.647.354-.353.707.707-.353.354-3.647 3.646 3.647 3.646.353.354-.707.707-.354-.353-3.646-3.647-3.646 3.647-.354.353-.707-.707.353-.354 3.647-3.646z"></path>
-          </svg>
-        </div>
-      </div>
-      <div class="body">
-        <div v-for="(v,k) in config">
-          <label>{{v.label}}</label>
-          <div v-if="v.type==='fullText'">
-            <textarea v-model="tempData[k]" @input="input"></textarea>
-          </div>
-          <div v-else-if="v.type==='color'">
-            <input v-model="tempData[k]" @input="input"/>
-          </div>
-          <div v-else-if="v.type==='enum'">
-            <select v-model="tempData[k]" @input="input">
-              <option v-for="i in v.options" :name="i.label" :value="i.value">{{i.label}}</option>
-            </select>
+      <div class="editor">
+        <div class="head">
+          {{title}}
+          <div class="button-content button-close" @click="close">
+            <svg width="25" height="25" viewBox="0 0 25 25">
+              <path
+                d="M11.793 12.5L8.146 8.854 7.793 8.5l.707-.707.354.353 3.646 3.647 3.646-3.647.354-.353.707.707-.353.354-3.647 3.646 3.647 3.646.353.354-.707.707-.354-.353-3.646-3.647-3.646 3.647-.354.353-.707-.707.353-.354 3.647-3.646z"></path>
+            </svg>
           </div>
         </div>
-      </div>
-      <div class="footer">
-        <button @click="save">保存</button>
-        <button @click="reset">还原</button>
+        <div class="body">
+          <div v-for="(v,k) in config">
+            <label>{{v.label}}</label>
+            <div v-if="v.type==='fullText'">
+              <el-input type="textarea"
+                        :rows="4"
+                        v-model="tempData[k]" @input="input"></el-input>
+            </div>
+            <div v-else-if="v.type==='color'">
+              <el-input v-model="tempData[k]" @input="input"></el-input>
+            </div>
+            <div v-else-if="v.type==='enum'">
+              <el-radio
+                v-for="i in v.options"
+                :key="i.label"
+                v-model="tempData[k]"
+                :label="i.value" @input="input">{{i.label}}
+              </el-radio>
+            </div>
+          </div>
+        </div>
+        <div class="footer">
+          <el-button type="primary" @click="save">保存</el-button>
+          <el-button @click="reset">还原</el-button>
+        </div>
       </div>
     </div>
   </div>
@@ -42,9 +49,6 @@
   // data:{config:{
   //  data
   // },data:{}}
-
-  import {bus, event} from '../util/event_bus'
-  import util from '../util'
 
   export default {
     name: 'EditBox',
@@ -58,6 +62,7 @@
         tempData: {},
         oldData: {},
         lastSaveData: {},
+        x: 'o',
       }
     },
     methods: {
@@ -92,11 +97,37 @@
       tranDataZ(src) {
         let x = _.cloneDeep(this.data)
         for (let k in this.config) {
-          let v = this.config[k]
-          eval('x.' + k + ' = this.tempData[\'' + k + '\']')
+          this.setValue(x,k,this.tempData[k])
         }
 
         return x
+      },
+      // 设置src对象的k为v
+      // k可以为嵌套表达式:如 data.text.value, 或者这种 data["text"]["value"]
+      // src.data.text.value = v
+      // 如果在解析过程中遇到undefined会自动赋值为空对象
+      setValue(src, k, v) {
+        // 将data.text.value转为data["text"]["value"]统一处理
+        // data.text["value"]
+        // src = src.replace(/\.(\w+)/g,'["$1"]')
+
+        // 将data["text-x"]["value"]转为data.text-x.value统一处理
+        k = k.replace(/"\]/g, '').replace(/\["/g, '.')
+
+        let arr = k.split('.')
+        let len = arr.length
+        let t = src
+        arr.forEach((i, index) => {
+          if (len === index + 1) {
+            t[i] = v
+            return
+          }
+
+          if (!t[i]) {
+            t[i] = {}
+          }
+          t = t[i]
+        })
       },
       cancel() {
         this.$emit('input', this.lastSaveData)
@@ -185,7 +216,6 @@
     right: 50px;
     top: 50px;
     width: 330px;
-    height: 600px;
     overflow-y: auto;
     background-color: #fff;
     z-index: 100;
@@ -199,41 +229,60 @@
       top: 0;
       width: 100%;
       height: 100%;
+      pointer-events: none;
     }
+    .editor {
+      position: relative;
 
-    .head {
-      padding: 10px;
-      background-color: #64a4ff;
-      color: #fff;
-      .button-close {
-        cursor: pointer;
-        background-color: #4e7dc5;
-        border-radius: 999px;
-        float: right;
-        height: 25px;
-        svg {
-          fill: #fff;
+      .head {
+        padding: 10px;
+        background-color: #64a4ff;
+        color: #fff;
+        .button-close {
+          cursor: pointer;
+          background-color: #4e7dc5;
+          border-radius: 999px;
+          float: right;
+          height: 25px;
+          svg {
+            fill: #fff;
+          }
         }
       }
-    }
-    .body {
-      padding: 10px;
-      .num {
-        > span {
-          display: inline-block;
-          background-color: rgba(100, 164, 255, 0.6);
-          color: #fff;
-          width: 20px;
-          height: 20px;
-          font-size: 12px;
-          line-height: 20px;
-          text-align: center;
+      .body {
+        padding: 10px;
+        height: 530px;
+        overflow-y: auto;
+        .num {
+          > span {
+            display: inline-block;
+            background-color: rgba(100, 164, 255, 0.6);
+            color: #fff;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            line-height: 20px;
+            text-align: center;
+          }
+        }
+
+        /*滚动条样式*/
+        &::-webkit-scrollbar {
+          width: 4px;
+          height: 4px;
+        }
+        &::-webkit-scrollbar-thumb {
+          border-radius: 5px;
+          background: rgba(0, 0, 0, 0.15);
+        }
+        &::-webkit-scrollbar-track {
+          border-radius: 5px;
+          background: rgba(0, 0, 0, 0.07);
         }
       }
-    }
-    .footer {
-      padding: 10px;
-
+      .footer {
+        padding: 10px;
+      }
     }
   }
 

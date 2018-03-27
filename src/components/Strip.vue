@@ -9,7 +9,7 @@
     </div>
     <template v-else>
       <component v-for="(item, index) in children" :key="item.id" :is="item.data.type" :params="item"
-                 @remove="remove(item.id)"></component>
+                 @remove="remove(item.data.id)"></component>
     </template>
   </div>
 </template>
@@ -56,7 +56,7 @@
 //        e.stopPropagation()
       },
       remove(id) {
-        let index = _.findIndex(this.params.children, i => i.id === id)
+        let index = _.findIndex(this.params.children, i => i.data.id === id)
         if (index >= 0) {
           this.params.children.splice(index, 1)
         }

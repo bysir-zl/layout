@@ -144,7 +144,7 @@
         return item
       }
 
-      this.data = fullChildren(page, page.items)
+      this.params = fullChildren(page, page.items)
 
 
       setTimeout(() => {

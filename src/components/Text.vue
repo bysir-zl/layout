@@ -2,11 +2,11 @@
   <div class="self" data-comp="text" :id="'v-'+data.id">
     <div class="data" :style="style" :class="classes" @click="click">
       <div v-html="data.data.text"></div>
-      <video v-if="data.design.advanced.background&&data.design.advanced.background.type === 'video'"
+      <video v-if="data.design&&data.design.advanced.background&&data.design.advanced.background.type === 'video'"
              class="video-bg" loop autoplay :src="data.design.advanced.background.video"></video>
     </div>
     <edit-box v-if="active" @close="active=false" :data="data" :config="editConfig" title="text"
-              @input="onEdit"></edit-box>
+              @input="onEdit" @remove="$emit('remove')"></edit-box>
   </div>
 </template>
 
@@ -24,7 +24,7 @@
     name: 'VText',
     mixins: [mixin.style],
     props: [
-      'data',
+      'params',
     ],
     data() {
       return {
@@ -85,26 +85,19 @@
       },
 
       onEdit(s) {
-        Object.assign(this.data,s)
-//        this.data = s
-
-        this.reRender()
+        this.data = s
       },
       '$class'() {
         return obj2array(this.data.design.model, '-')
       },
       // 重新渲染, 一般在data改变后操作
-      reRender(){
-        this.processCss()
-      },
-
-      processCss() {
+      reRenderCss() {
         if (!this.data.design || !this.data.design.css) {
           return
         }
         // 处理高级样式
         let x = _.cloneDeep(this.data.design.css)
-        if (this.data.design.advanced) {
+        if (this.data.design && this.data.design.advanced) {
           if (this.data.design.advanced.background.type === 'img') {
             x.background = 'url(' + this.data.design.advanced.background.img + ')'
           } else if (this.data.design.advanced.background.type === 'color') {
@@ -114,10 +107,6 @@
         this.commitCss({".data": x})
       }
     },
-    mounted() {
-
-    },
-
     watch: {
       // 在data变化后需要生成新的css
       'data'(n, o) {
@@ -126,11 +115,11 @@
         }
 
         console.log('text data changed')
-        this.reRender()
+        this.reRenderCss()
       },
     },
     created() {
-      this.reRender()
+      this.reRenderCss()
     }
   }
 </script>

@@ -23,7 +23,7 @@
   export default {
     name: 'Add',
     props: [
-      'data',
+      'params',
     ],
     data() {
       return {
@@ -48,13 +48,21 @@
       },
       add(item) {
         item.id = util.genId()
-        this.$store.commit('view/addItemWithLayout', {
-          parentId: this.data.data.parentId,
-          index: this.data.data.index,
-          items: [item]
-        })
+
+        this.data.data.parent.splice(this.data.data.index, 0, {data:item})
+
+        // this.$store.commit('view/addItemWithLayout', {
+        //   parentId: this.data.data.parentId,
+        //   index: this.data.data.index,
+        //   items: [item]
+        // })
 
         this.close()
+      }
+    },
+    computed: {
+      data() {
+        return this.params.data ? this.params.data : {}
       }
     },
     mounted() {

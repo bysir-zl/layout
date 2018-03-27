@@ -59,7 +59,9 @@ export default {
         css[key] = value
 
         let html = this._renderCssJsItem(css)
-        Vue.set(status.cssRendered, key, html)
+        if (html){
+          Vue.set(status.cssRendered, key, html)
+        }
       },
       // 设置css变量, 注意设置变量后会重新渲染整个css
       setRoot(root) {
@@ -72,15 +74,24 @@ export default {
           let css = {}
           css[k] = status.cssJs[k]
           let html = this._renderCssJsItem(css)
-          Vue.set(status.cssRendered, k, html)
+          if (html){
+            Vue.set(status.cssRendered, k, html)
+          }
         }
       },
       _renderCssJsItem(css) {
         if (this.root) {
           css[":root"] = this.root
         }
+        let r = ''
+        try {
+          r = processCssJs(css)
+        } catch (e) {
+          console.warn(e)
+          return null
+        }
 
-        return "<style>" + processCssJs(css) + "</style>"
+        return "<style>" + r + "</style>"
       },
 
       // 生成一个大的css

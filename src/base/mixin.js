@@ -17,6 +17,7 @@ export default {
     computed: {
       // style只会在用户自定义style才会使用, 所以每个组件都是统一的
       style() {
+        // return {}
         if (!this.data.design || !this.data.design.custom || !this.data.design.custom.style) {
           return []
         }
@@ -25,6 +26,7 @@ export default {
       },
       // 计算要使用的class, 由 用户自定义 + 每个组件自己的逻辑 得到
       classes() {
+        // return []
         let base = []
         if (this.data.design) {
           if (this.data.design.custom && this.data.design.custom.classes) {
@@ -38,16 +40,16 @@ export default {
       },
 
       id() {
-        return this.data.id
+        return this.params.data.id
       },
-      // data: {
-      //   get() {
-      //     return this.$store.state.view.items[this.id]
-      //   },
-      //   set(v) {
-      //     this.$store.commit('view/updateItem', {id: v.id, data: v})
-      //   }
-      // },
+      data: {
+        get() {
+          return this.params.data ? this.params.data : {}
+        },
+        set(v) {
+          this.params.data = v
+        }
+      }
     }
   }
 }

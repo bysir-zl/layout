@@ -1,8 +1,7 @@
 <template>
   <div @click="click" class="editor">
     <div>editor start</div>
-    <page :data="data"></page>
-    <strip v-for="(item,index) in strips" :key="index" :layout="item"></strip>
+    <page :params="params"></page>
     <div>editor end</div>
   </div>
 </template>
@@ -14,7 +13,9 @@
     name: 'Editor',
     data() {
       return {
-        data: {},
+        params: {
+          data: {}
+        },
       }
     },
     computed: {
@@ -33,13 +34,12 @@
       })
     },
 
-    // 这个是全局属性, 放在store最好了
+    // 为什么不用vuex做单向数据流, 因为在这项目中, 其实没有父组件管理子组件的概念, 组件应该自己管理自己.
+    // 放在全局的store里在做复用组件的时候不好做, 因为复用组件需要自己管理自己的所有元素, 给不是交给这个全局的store管理.
+
     mounted() {
       let page = {
-        id: "page1",
-        data: {
-          title: "你好"
-        },
+        i: "page1",
         c: [
           {
             i: '1',
@@ -49,6 +49,13 @@
           }
         ],
         items: {
+          'page1': {
+            id: 'page1',
+            type: 'page',
+            data: {
+              title: "你好"
+            },
+          },
           '1': {
             id: 1,
             type: 'strip',
@@ -86,37 +93,58 @@
         }
       }
 
-      // 为什么要处理这个数据?
-      // 嵌套结构时 组件自己管理自己的儿子, 不需要维护一个全局对象存放items
-      // 当需要做复用组件的时候, 原数据结构不太方便, 因为又需要将复用的组件items放在全局对象里面
+      // 将数据处理成这种格式:
+      // 每一个组件都有data和children根字段, data保存自己的数据, children保存儿子的数据, 父组件只会修改data的数据和children的增加删除, 不会更改子组件的data.
 
+      // 为什么在更新组件属性的时候一般是赋值整个data, 而不是更改data里的一项:
+      //  因为有时候data里有些属性不是初始化就有的, 是不能响应式监听到的, 直接更改data就能触发响应式.
+      // 为什么要data和children分开为一个对象的两个字段:
+      //  1. 上面说了更新组件属性的时候一般是赋值整个data, 如果不在外层包裹一层而是直接将data传递进入子组件,那么根据vue的单向数据流原则是不能赋值传递进来的值的. 包裹一层后组件就能自己管理自己data.
+      //  2. 赋值data操作会用到深copy, data里的数据越简单越好, 所以将children提高一个层级.
 
-      function collectChildren(layout, items) {
-        let c = []
-
-        for (let i in layout) {
-          let l = layout[i]
-          let item = items[l.i]
-          if (l.c) {
-            item.children = collectChildren(l.c, items)
+      let t = {
+        data: {
+          id: '1',
+          type: 'page',
+          data: {}
+        },
+        children: [
+          {
+            data: {
+              id: '1',
+              type: 'page',
+              data: {}
+            },
+            children: [
+              {
+                data: {
+                  id: '1',
+                  type: 'text',
+                  data: {}
+                }
+              }
+            ]
           }
+        ]
+      }
 
-          c.push(item)
+      function fullChildren(layout, items) {
+        let item = {
+          data: items[layout.i]
         }
-        return c
+        if (layout.c) {
+          let c = []
+          for (let i in layout.c) {
+            let l = layout.c[i]
+            c.push(fullChildren(l, items))
+          }
+          item.children = c
+        }
+
+        return item
       }
 
-      // 处理这个数据
-      let view = {
-        id: page.id,
-        data: page.data,
-        design: page.design,
-        children: collectChildren(page.c, page.items)
-      }
-
-      this.data = view
-
-      // 为什么不用vuex做单向数据流, 因为在这项目中, 其实没有父组件管理子组件的概念, 组件应该自己管理自己. 如果做单向数据流就有点得不偿失
+      this.data = fullChildren(page, page.items)
 
 
       setTimeout(() => {

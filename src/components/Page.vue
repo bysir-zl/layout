@@ -1,7 +1,7 @@
 <!--页面, 也就是纵向布局容器-->
 
 <template>
-  <row :data="data">
+  <row :params="params">
   </row>
 </template>
 
@@ -14,7 +14,7 @@
     name: 'Page',
     mixins: [mixin.style],
     props: [
-      'data',
+      'params',
     ],
 
     data() {

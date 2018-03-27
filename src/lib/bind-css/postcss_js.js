@@ -8,7 +8,6 @@ import variables from 'postcss-css-variables' // 支持变量 如:root{--a:#333}
 import csso from 'postcss-csso' // 压缩
 
 function processCssJs(cssJs) {
-  // return ""
   return postcss([autoprefixer, nested, variables, csso]).process(
     cssJs, {parser: postcssJs}).css
 }

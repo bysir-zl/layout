@@ -2,6 +2,9 @@
   <div>
     <div class="editor-box">
       <div class="info">{{title}}</div>
+      <div class="button">
+        <button @click="$emit('remove')">删除</button>
+      </div>
     </div>
     <div class="editor-fixed">
       <div class="mask"></div>
@@ -95,10 +98,11 @@
         this.lastSaveData = x
 
         this.$emit('input', x)
+        this.close()
       },
       reset() {
-        console.log("reset")
         this.$emit('input', this.oldData)
+        this.lastSaveData = this.oldData
 
         this.tempData = this.tranData(this.oldData)
       },
@@ -107,7 +111,18 @@
 
         for (let k in this.config) {
           let v = this.config[k]
-          y[k] = eval('x.' + k)
+          try {
+            y[k] = eval('x.' + k)
+          } catch (e) {
+            // 需要给属性赋值上默认值, 才能实现数据绑定
+            switch (v.type) {
+              case 'background':
+                y[k] = {}
+                break
+              default:
+                y[k] = null
+            }
+          }
         }
 
         return y
@@ -154,37 +169,6 @@
         this.cancel()
         this.$emit('close', false)
       },
-      editClickCss() {
-        // 请注意要clone一个在修改
-        // 1: 单向数据流
-        // 2: 如果直接在原对象里改, 当commit之后, 由于是同一个对象就不会触发到data的watch
-        let s = _.cloneDeep(this.data)
-        if (!s.design) {
-          s.design = {css: {}}
-        } else if (!s.design.css) {
-          s.design.css = {}
-        }
-        s.design.css["background-color"] = "#f00"
-        this.$emit('input', s)
-      },
-      editClickModel() {
-        let s = _.cloneDeep(this.data)
-        if (!s.design) {
-          s.design = {model: {}}
-        } else if (!s.design.model) {
-          s.design.model = {}
-        }
-        s.design.model['shape'] = 'p'
-
-        this.$emit('input', s)
-
-      },
-      editClickText() {
-        let s = _.cloneDeep(this.data)
-        s.data.text = "hh"
-
-        this.$emit('input', s)
-      },
     },
     watch: {
       'active'() {
@@ -195,8 +179,8 @@
     },
     created() {
       // 将当前数据copy一份
-      this.oldData = _.cloneDeep(this.data)
-      this.lastSaveData = _.cloneDeep(this.data)
+      this.oldData = this.data
+      this.lastSaveData = this.data
 
       this.tempData = this.tranData(this.data)
     }
@@ -212,7 +196,6 @@
     height: calc(100% + 4px);
     top: -2px;
     left: -2px;
-    pointer-events: none;
 
     border: 1px solid #64a4ff;
     .info {

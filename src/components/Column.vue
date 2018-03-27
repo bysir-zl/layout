@@ -3,7 +3,7 @@
   <div class="self show-border editor-padding" @click="click" :style="style" :class="classes">
     <div class="row">
       <div v-for="(item,index) in children" class="col" :class="'col-'+widths[index]">
-        <component :is="item.type" :layout="item"></component>
+        <component :is="item.data.type" :layout="item" @remove="remove(item.id)"></component>
       </div>
     </div>
     <div class="edit" ref="btn">edit column</div>
@@ -86,24 +86,15 @@
           }
           this.active = false
         })
-
       },
       onEdit(s) {
         this.data = s
       },
-      setNum(num) {
-        let t = []
-        for (let i = 0; i < num; i++) {
-          t.push("")
+      remove(id) {
+        let index = _.findIndex(this.data.children, i => i.id === id)
+        if (index >= 0) {
+          this.data.children.splice(index, 1)
         }
-        let s = _.cloneDeep(this.data)
-        if (!s.data) {
-          s.data = {widths: t}
-        } else {
-          s.data.widths = t
-        }
-
-        this.$store.commit('view/updateItem', {id: this.id, data: s})
       },
       modifyChildren() {
         // 根据width修改儿子

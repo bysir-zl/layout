@@ -44,9 +44,12 @@
           {
             i: '1',
             c: [
-              {i: '2',}
+              {i: '2'},
             ]
-          }
+          },
+          {
+            i: '2',
+          },
         ],
         items: {
           'page1': {
@@ -128,7 +131,16 @@
         ]
       }
 
+      // 在同一个组件复用的时候, 在结构树中应该引用已经处理好的组件.
+      // 以实现数据通用
+      // 不过在实际使用中, 不经常出现这个场景
+      let temp = {}
+
       function fullChildren(layout, items) {
+        if (temp[layout.i]) {
+          return temp[layout.i]
+        }
+
         let item = {
           data: items[layout.i]
         }
@@ -140,6 +152,8 @@
           }
           item.children = c
         }
+
+        temp[layout.i] = item
 
         return item
       }

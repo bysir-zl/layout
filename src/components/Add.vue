@@ -49,14 +49,8 @@
       add(item) {
         item.id = util.genId()
 
-        this.data.data.parent.splice(this.data.data.index, 0, {data:item})
-
-        // this.$store.commit('view/addItemWithLayout', {
-        //   parentId: this.data.data.parentId,
-        //   index: this.data.data.index,
-        //   items: [item]
-        // })
-
+        this.data.parent.splice(this.data.index, 0,
+          {id: item.id, type: item.type, data: item, children: []})
         this.close()
       }
     },

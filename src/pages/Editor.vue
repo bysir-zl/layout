@@ -1,7 +1,7 @@
 <template>
   <div @click="click" class="editor">
     <div>editor start</div>
-    <page :params="params"></page>
+    <layout :params="layout"></layout>
     <div>editor end</div>
   </div>
 </template>
@@ -13,15 +13,16 @@
     name: 'Editor',
     data() {
       return {
-        params: {
-          data: {}
+        layout: {
+          id: 0,
+          layout: {},
+          items: {},
+          reuse: {}
         },
       }
     },
     computed: {
-      strips() {
-        return this.$store.state.view.layout
-      }
+
     },
     methods: {
       click(ele) {
@@ -34,30 +35,32 @@
       })
     },
 
-    // 为什么不用vuex做单向数据流, 因为在这项目中, 其实没有父组件管理子组件的概念, 组件应该自己管理自己.
-    // 放在全局的store里在做复用组件的时候不好做, 因为复用组件需要自己管理自己的所有元素, 给不是交给这个全局的store管理.
+    // 为什么不用vuex做单向数据流
+    //  1. 因为在这项目中, 其实没有父组件管理子组件的概念, 组件应该自己管理自己, 就算自己数据改变了也不应该让父组件知道并处理.
+    //  2. 放在全局的store里在做复用组件的时候不好做, 因为复用组件需要自己管理自己的所有元素, 给不是交给这个全局的store管理.
 
+    // layout必须是一个(容器)组件
     mounted() {
-      let page = {
-        i: "page1",
-        c: [
-          {
-            i: '1',
-            c: [
-              {i: '2'},
-            ]
-          },
-          {
-            i: '2',
-          },
-        ],
-        items: {
-          'page1': {
-            id: 'page1',
-            type: 'page',
-            data: {
-              title: "你好"
+      let layout = {
+        id: 'layout1',
+        layout: {
+          i: 0,
+          c: [
+            {
+              i: '1',
+              c: [
+                {i: '2'},
+              ]
             },
+            {i: '44', layout: true},
+            {i: '2'},
+          ]
+        }
+        ,
+        items: {
+          '0': {
+            id: 0,
+            type: 'row'
           },
           '1': {
             id: 1,
@@ -93,77 +96,62 @@
               },
             },
           }
-        }
-      }
-
-      // 将数据处理成这种格式:
-      // 每一个组件都有data和children根字段, data保存自己的数据, children保存儿子的数据, 父组件只会修改data的数据和children的增加删除, 不会更改子组件的data.
-
-      // 为什么在更新组件属性的时候一般是赋值整个data, 而不是更改data里的一项:
-      //  因为有时候data里有些属性不是初始化就有的, 是不能响应式监听到的, 直接更改data就能触发响应式.
-      // 为什么要data和children分开为一个对象的两个字段:
-      //  1. 上面说了更新组件属性的时候一般是赋值整个data, 如果不在外层包裹一层而是直接将data传递进入子组件,那么根据vue的单向数据流原则是不能赋值传递进来的值的. 包裹一层后组件就能自己管理自己data.
-      //  2. 赋值data操作会用到深copy, data里的数据越简单越好, 所以将children提高一个层级.
-
-      let t = {
-        data: {
-          id: '1',
-          type: 'page',
-          data: {}
         },
-        children: [
-          {
-            data: {
-              id: '1',
-              type: 'page',
-              data: {}
-            },
-            children: [
+        layouts: {
+          '44': {
+            id: 'layout2',
+            layout:
               {
-                data: {
-                  id: '1',
-                  type: 'text',
-                  data: {}
-                }
+                i: '21',
+                c: [
+                  {i: '22'},
+                ]
               }
-            ]
+            ,
+            items: {
+              '21': {
+                id: 21,
+                type: 'strip',
+                data: {
+                  fulled: true,
+                }
+              },
+              '22': {
+                id: 22,
+                type: 'z-text',
+                data: {
+                  text: '<h1>HELLO LAYOUT</h1>'
+                },
+                design: {
+                  // 其中 优先级 model < css < advanced < custom
+                  model: {'shape': ''}, // 选定指定好了的类
+                  css: { // 用户输入数值, 将会生成到<style>标签里, 使用id作为选择器
+                    'color': '#111',
+                    '&:hover': {"color": "#666"},
+                  },
+                  advanced: {
+                    'background': {
+                      'type': 'color',
+                      'video': 'http://www.w3school.com.cn/i/movie.ogg',
+                      'img': 'http://pic.sc.chinaz.com/Files/pic/pic9/201802/bpic5722_s.jpg',
+                      'color': '#dee'
+                    }
+                  },
+                  custom: { // 用户自己输入的样式与类, 将原封不动的添加到元素的class和style
+                    // style: {'color': '#37e'}, classes: []
+                  },
+                },
+              }
+            }
           }
-        ]
+        }
       }
 
-      // 在同一个组件复用的时候, 在结构树中应该引用已经处理好的组件.
-      // 以实现数据通用
-      // 不过在实际使用中, 不经常出现这个场景
-      let temp = {}
+      this.layout = layout
 
-      function fullChildren(layout, items) {
-        if (temp[layout.i]) {
-          return temp[layout.i]
-        }
-
-        let item = {
-          data: items[layout.i]
-        }
-        if (layout.c) {
-          let c = []
-          for (let i in layout.c) {
-            let l = layout.c[i]
-            c.push(fullChildren(l, items))
-          }
-          item.children = c
-        }
-
-        temp[layout.i] = item
-
-        return item
-      }
-
-      this.params = fullChildren(page, page.items)
-
-
-      setTimeout(() => {
-        this.$css.save()
-      }, 2000)
+      // setTimeout(() => {
+      //   this.$css.save()
+      // }, 2000)
     },
   }
 </script>

@@ -85,6 +85,7 @@
       },
 
       onEdit(s) {
+        console.log(s.design.advanced.background.type)
         this.data = s
       },
       '$class'() {
@@ -95,6 +96,11 @@
         if (!this.data.design || !this.data.design.css) {
           return
         }
+        // 当在发布模式下, css已经缓存下来了, 就不需要处理的.
+        if (this.$css.locked) {
+          return
+        }
+
         // 处理高级样式
         let x = _.cloneDeep(this.data.design.css)
         if (this.data.design && this.data.design.advanced) {
@@ -104,6 +110,7 @@
             x.background = this.data.design.advanced.background.color
           }
         }
+
         this.commitCss({".data": x})
       }
     },

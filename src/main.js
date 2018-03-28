@@ -10,7 +10,7 @@ import Column from './components/Column.vue'
 import Add from './components/Add.vue'
 import Strip from './components/Strip.vue'
 import EditBox from './components/EditBox.vue'
-import Page from './components/Page.vue'
+import Layout from './layout/Layout.vue'
 import store from './store'
 import 'lodash'
 
@@ -26,7 +26,7 @@ Vue.component('column', Column)
 Vue.component('add', Add)
 Vue.component('strip', Strip)
 Vue.component('edit-box', EditBox)
-Vue.component('page', Page)
+Vue.component('layout', Layout)
 
 /* eslint-disable no-new */
 new Vue({

@@ -98,13 +98,11 @@
         this.lastSaveData = x
 
         this.$emit('input', x)
-        this.close()
+        this.$emit('close', false)
       },
       reset() {
         this.$emit('input', this.oldData)
         this.lastSaveData = this.oldData
-
-        this.tempData = this.tranData(this.oldData)
       },
       tranData(x) {
         let y = {}
@@ -114,7 +112,7 @@
           try {
             y[k] = eval('x.' + k)
           } catch (e) {
-            // 需要给属性赋值上默认值, 才能实现数据绑定
+            // 需要给属性赋值上默认值, 才能实现数据响应式
             switch (v.type) {
               case 'background':
                 y[k] = {}
@@ -171,16 +169,14 @@
       },
     },
     watch: {
-      'active'() {
-        if (this.active) {
-
-        }
+      'data'() {
+        this.tempData = this.tranData(this.data)
       }
     },
     created() {
       // 将当前数据copy一份
-      this.oldData = this.data
-      this.lastSaveData = this.data
+      this.oldData = _.cloneDeep(this.data)
+      this.lastSaveData = this.oldData
 
       this.tempData = this.tranData(this.data)
     }

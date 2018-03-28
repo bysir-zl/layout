@@ -2,15 +2,15 @@
 
 <template>
   <div :style="style" @click="click" :class="classes" data-type="row" class="show-border editor-padding">
-    <div v-if="!params.children || params.children.length===0">
+    <div v-if="params.children.length===0">
       <div class=" placeholder">
-        <component v-for="(item, index) in children" :key="item.id" :is="item.data.type" :params="item"></component>
+        <component v-for="(item, index) in children" :key="item.id" :is="item.type" :params="item"></component>
       </div>
     </div>
     <template v-else>
-      <component v-for="(item, index) in children" :key="item.id" :is="item.data.type"
+      <component v-for="(item, index) in children" :key="item.id" :is="item.type"
                  :params="item"
-                 @remove="remove(item.data.id)">
+                 @remove="remove(item.id)">
       </component>
     </template>
   </div>
@@ -32,14 +32,12 @@
     computed: {
       children() {
         let t = []
-        for (let index in this.params.children) {
-          let item = this.params.children[index]
-
-          t.push({data: {type: 'add', data: {parent: this.params.children, index: parseInt(index)}}})
+        this.params.children.forEach((item, index) => {
+          t.push({type: 'add', data: {parent: this.params.children, index: parseInt(index)}})
           t.push(item)
-        }
+        })
 
-        t.push({data: {type: 'add', data: {parent: this.params.children, index: 99999}}})
+        t.push({type: 'add', data: {parent: this.params.children, index: 99999}})
 
         return t
       },

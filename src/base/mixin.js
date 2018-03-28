@@ -6,11 +6,11 @@ export default {
     methods: {
       // 封装提交css方法
       commitCss(value) {
-        if (!this.data.id) {
+        if (!this.id) {
           console.warn("component must has unique id to use commit css")
           return
         }
-        let key = "#v-" + this.data.id
+        let key = "#v-" + this.id
         this.$css.add(key, value)
       }
     },

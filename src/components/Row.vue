@@ -1,7 +1,8 @@
 <!--行组件, 也就是纵向布局容器-->
+<!-- data.center=true 则居中布局-->
 
 <template>
-  <div :style="style" @click="click" :class="classes" data-type="row" class="show-border editor-padding">
+  <div :id="'v-'+this.id" :style="style" @click="click" :class="classes" data-type="row" class="show-border editor-padding">
     <div v-if="params.children.length===0" class="placeholder">
       <add :index="0" @add="add"></add>
     </div>
@@ -60,7 +61,13 @@
       add({index, item}) {
         this.params.children.splice(index, 0, item)
         bus.$emit(event.LayoutChanged + this.data._layoutId)
-      }
+      },
+      '$class'() {
+        if (this.data.data&&this.data.data.center){
+          return ["container"]
+        }
+        return []
+      },
     },
     mounted() {
 

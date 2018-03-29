@@ -88,6 +88,9 @@
         this.data = s
       },
       '$class'() {
+        if (!this.data.design) {
+          return []
+        }
         return obj2array(this.data.design.model, '-')
       },
       // 重新渲染, 一般在data改变后操作

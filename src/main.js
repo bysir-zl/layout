@@ -8,7 +8,6 @@ import Text from './components/Text.vue'
 import Row from './components/Row.vue'
 import Column from './components/Column.vue'
 import Add from './components/Add.vue'
-import Strip from './components/Strip.vue'
 import EditBox from './components/EditBox.vue'
 import Layout from './layout/Layout.vue'
 import store from './store'
@@ -24,7 +23,6 @@ Vue.component('z-text', Text)
 Vue.component('row', Row)
 Vue.component('column', Column)
 Vue.component('add', Add)
-Vue.component('strip', Strip)
 Vue.component('edit-box', EditBox)
 Vue.component('layout', Layout)
 

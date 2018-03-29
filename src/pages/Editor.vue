@@ -64,9 +64,9 @@
           },
           '1': {
             id: 1,
-            type: 'strip',
+            type: 'row',
             data: {
-              fulled: true,
+              center: true,
             }
           },
           '2': {
@@ -111,9 +111,9 @@
             items: {
               '21': {
                 id: 21,
-                type: 'strip',
+                type: 'row',
                 data: {
-                  fulled: true,
+                  center: true,
                 }
               },
               '22': {

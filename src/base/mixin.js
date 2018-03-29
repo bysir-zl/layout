@@ -32,9 +32,9 @@ export default {
           if (this.data.design.custom && this.data.design.custom.classes) {
             base = this.data.design.custom.classes
           }
-          if (this['$class']) {
-            base = base.concat(this['$class']())
-          }
+        }
+        if (this['$class']) {
+          base = base.concat(this['$class']())
         }
         return base
       },

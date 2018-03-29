@@ -1,7 +1,7 @@
 <!--布局器, 会重组数据结构,并读对组件进行布局-->
 
 <template>
-  <div>
+  <div :id="'layout-'+params.id">
     <component :is="root.type" :params="root"></component>
   </div>
 </template>
@@ -20,7 +20,6 @@
       */
   export default {
     name: 'Layout',
-    mixins: [mixin.style],
     props: [
       'params',
     ],
@@ -74,10 +73,9 @@
           layouts: {}
         }
 
-
         let layoutId = this.params.id
-        let layouts = this.params.layouts
-        let items = this.params.items
+        let layouts = this.params.layouts ? this.params.layouts : {}
+        let items = this.params.items ? this.params.items : {}
 
         // 在同一个组件复用的时候, 在结构树中应该引用已经处理好的组件, 以实现数据通用
         // 不过在实际使用中, 不经常出现这个场景
@@ -130,11 +128,52 @@
         return fullChildren(this.params.layout)
       },
       init() {
-        bus.$on(event.ItemChanged + this.params.id, ({id, item}) => {
-          console.log("item changed, ", this.params.id, id, item)
+        bus.$on(event.ItemChanged + this.params.id, (item) => {
+          console.log("item changed, ", this.params.id, item)
+
+          this.axios.put("/v1/item", item).then(({data}) => {
+
+          })
         })
         bus.$on(event.LayoutChanged + this.params.id, () => {
           console.log("layout changed, ", this.params.id)
+
+          function getLayout(root) {
+            let l = {
+              i: root.id
+            }
+            if (root.type === 'layout') {
+              l.layout = true
+            }
+            if (!root.children || root.children.length === 0) {
+              return l
+            }
+            let c = []
+            root.children.forEach((v) => {
+              c.push(getLayout(v))
+            })
+            l.c = c
+
+            return l
+          }
+
+          console.log("root", this.root)
+
+          let post = {
+            id: this.params.id,
+            layout: JSON.stringify(getLayout(this.root))
+          }
+
+          this.axios.put("/v1/page", post).then(({data}) => {
+
+          })
+
+        })
+        bus.$on(event.ItemAdded + this.params.id, (item) => {
+          console.log("item add, ", this.params.id)
+        })
+        bus.$on(event.ItemRemove + this.params.id, (item) => {
+          console.log("item remove, ", this.params.id)
         })
 
         this.root = this.buildRoot()

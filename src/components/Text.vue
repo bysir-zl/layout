@@ -1,12 +1,12 @@
 <template>
-  <div class="self" data-comp="text" :id="'v-'+data.id">
+  <div class="self" data-comp="text" :id="'item-'+data.id">
     <div class="data" :style="style" :class="classes" @click="click">
       <div v-html="data.data.text"></div>
       <video v-if="data.design&&data.design.advanced.background&&data.design.advanced.background.type === 'video'"
              class="video-bg" loop autoplay :src="data.design.advanced.background.video"></video>
     </div>
     <edit-box v-if="active" @close="active=false" :data="data" :config="editConfig" title="text"
-              @input="onEdit" @remove="$emit('remove')"></edit-box>
+              @input="onEdit" @save="onSave" @remove="$emit('remove')"></edit-box>
   </div>
 </template>
 
@@ -86,6 +86,11 @@
 
       onEdit(s) {
         this.data = s
+      },
+      onSave(s) {
+        this.data = s
+
+        bus.$emit(event.ItemChanged + this.data._layoutId, s)
       },
       '$class'() {
         if (!this.data.design) {

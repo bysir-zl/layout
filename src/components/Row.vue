@@ -2,7 +2,8 @@
 <!-- data.center=true 则居中布局-->
 
 <template>
-  <div :id="'v-'+this.id" :style="style" @click="click" :class="classes" data-type="row" class="show-border editor-padding">
+  <div :id="'item-'+this.id" :style="style" @click="click" :class="classes" data-type="row"
+       class="show-border editor-padding">
     <div v-if="params.children.length===0" class="placeholder">
       <add :index="0" @add="add"></add>
     </div>
@@ -60,10 +61,20 @@
       },
       add({index, item}) {
         this.params.children.splice(index, 0, item)
-        bus.$emit(event.LayoutChanged + this.data._layoutId)
+        // 异步请求并更新id
+        let post = _.cloneDeep(item.data)
+        post.id = 0
+
+        this.axios.post("/v1/item", post).then(({data}) => {
+          item.id = data.id
+          item.data.id = data.id
+
+          bus.$emit(event.ItemAdded + this.data._layoutId, item)
+          bus.$emit(event.LayoutChanged + this.data._layoutId)
+        })
       },
       '$class'() {
-        if (this.data.data&&this.data.data.center){
+        if (this.data.data && this.data.data.center) {
           return ["container"]
         }
         return []

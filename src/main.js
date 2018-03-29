@@ -2,8 +2,13 @@ import Vue from 'vue'
 import App from './App.vue'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+
 import BindCss from './lib/bind-css'
+import 'lodash'
+
+import './util/ajax.js'
 import router from './router'
+
 import Text from './components/Text.vue'
 import Row from './components/Row.vue'
 import Column from './components/Column.vue'
@@ -11,7 +16,6 @@ import Add from './components/Add.vue'
 import EditBox from './components/EditBox.vue'
 import Layout from './layout/Layout.vue'
 import store from './store'
-import 'lodash'
 
 // Vue.config.productionTip = false
 

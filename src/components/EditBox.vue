@@ -94,7 +94,7 @@
       },
       save() {
         let x = this.tranDataZ(this.oldData, this.tempData)
-        this.$emit('input', x)
+        this.$emit('save', x)
         this.$emit('close', false)
       },
       reset() {

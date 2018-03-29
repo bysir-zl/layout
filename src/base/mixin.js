@@ -10,7 +10,7 @@ export default {
           console.warn("component must has unique id to use commit css")
           return
         }
-        let key = "#v-" + this.id
+        let key = "#item-" + this.id
         this.$css.add(key, value)
       }
     },

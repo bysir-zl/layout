@@ -30,9 +30,7 @@
       }
     },
     created() {
-      bus.$on(event.ItemChanged, ({id, props}) => {
-        console.log(id, props)
-      })
+
     },
 
     // 为什么不用vuex做单向数据流
@@ -42,18 +40,18 @@
     // layout必须是一个(容器)组件
     mounted() {
       let layout = {
-        id: 'layout1',
+        id: 1,
         layout: {
           i: 0,
           c: [
             {
-              i: '1',
+              i: 1,
               c: [
-                {i: '2'},
+                {i: 2},
               ]
             },
-            {i: '44', layout: true},
-            {i: '2'},
+            {i: 44, layout: true},
+            {i: 2},
           ]
         }
         ,
@@ -98,13 +96,13 @@
           }
         },
         layouts: {
-          '44': {
-            id: 'layout2',
+          44: {
+            id: 44,
             layout:
               {
-                i: '21',
+                i: 21,
                 c: [
-                  {i: '22'},
+                  {i: 22},
                 ]
               }
             ,
@@ -147,7 +145,11 @@
         }
       }
 
-      this.layout = layout
+//      this.layout = layout
+
+      this.axios.get("/v1/page/layout?id=1").then(({data}) => {
+        this.layout = data
+      })
 
       // setTimeout(() => {
       //   this.$css.save()

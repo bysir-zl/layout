@@ -85,7 +85,6 @@
       },
 
       onEdit(s) {
-        console.log(s.design.advanced.background.type)
         this.data = s
       },
       '$class'() {

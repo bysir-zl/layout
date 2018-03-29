@@ -78,36 +78,42 @@
     ],
     data() {
       return {
-        tempData: {empty: true},
+        tempData: {},
         oldData: {},
-        lastSaveData: {},
         x: 'o',
         bg: {},
       }
     },
     methods: {
       input() {
-        // 这里settimeout是英文在部分控件触发@input="input"的时候, v-model还没来得及改变
+        // 这里settimeout是因为在部分控件触发@input="input"的时候, v-model还没来得及改变
         setTimeout(() => {
-          let x = this.tranDataZ(this.tempData)
+          let x = this.tranDataZ(this.oldData, this.tempData)
           this.$emit('input', x)
         }, 10)
       },
       save() {
-        let x = this.tranDataZ(this.tempData)
-        this.lastSaveData = x
-
+        let x = this.tranDataZ(this.oldData, this.tempData)
         this.$emit('input', x)
         this.$emit('close', false)
       },
       reset() {
+        this.$emit('input', _.cloneDeep(this.oldData))
+      },
+      cancel() {
         this.$emit('input', this.oldData)
-        this.lastSaveData = this.oldData
+      },
+      close() {
+        this.cancel()
+        this.$emit('close', false)
       },
       tranData(x) {
         let y = {}
 
         for (let k in this.config) {
+          if (!this.config.hasOwnProperty(k)) {
+            continue
+          }
           let v = this.config[k]
           try {
             y[k] = eval('x.' + k)
@@ -125,10 +131,13 @@
 
         return y
       },
-      tranDataZ(src) {
-        let x = _.cloneDeep(this.data)
+      tranDataZ(base, src) {
+        let x = _.cloneDeep(base)
         for (let k in this.config) {
-          this.setValue(x, k, this.tempData[k])
+          if (!this.config.hasOwnProperty(k)) {
+            continue
+          }
+          this.setValue(x, k, src[k])
         }
 
         return x
@@ -138,10 +147,6 @@
       // src.data.text.value = v
       // 如果在解析过程中遇到undefined会自动赋值为空对象
       setValue(src, k, v) {
-        // 将data.text.value转为data["text"]["value"]统一处理
-        // data.text["value"]
-        // src = src.replace(/\.(\w+)/g,'["$1"]')
-
         // 将data["text-x"]["value"]转为data.text-x.value统一处理
         k = k.replace(/"\]/g, '').replace(/\["/g, '.')
 
@@ -160,13 +165,6 @@
           t = t[i]
         })
       },
-      cancel() {
-        this.$emit('input', this.lastSaveData)
-      },
-      close() {
-        this.cancel()
-        this.$emit('close', false)
-      },
     },
     watch: {
       'data'() {
@@ -176,7 +174,6 @@
     created() {
       // 将当前数据copy一份
       this.oldData = _.cloneDeep(this.data)
-      this.lastSaveData = this.oldData
 
       this.tempData = this.tranData(this.data)
     }

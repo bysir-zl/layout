@@ -23,7 +23,7 @@
   export default {
     name: 'Add',
     props: [
-      'params',
+      'index',
     ],
     data() {
       return {
@@ -49,8 +49,8 @@
       add(item) {
         item.id = util.genId()
 
-        this.data.parent.splice(this.data.index, 0,
-          {id: item.id, type: item.type, data: item, children: []})
+        let d = {id: item.id, type: item.type, data: item, children: []}
+        this.$emit('add', {index:this.index,item:d})
         this.close()
       }
     },

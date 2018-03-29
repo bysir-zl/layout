@@ -2,22 +2,28 @@
 
 <template>
   <div :style="style" @click="click" :class="classes" data-type="row" class="show-border editor-padding">
-    <div v-if="params.children.length===0">
-      <div class=" placeholder">
-        <component v-for="(item, index) in children" :key="item.id" :is="item.type" :params="item"></component>
-      </div>
+    <div v-if="params.children.length===0" class="placeholder">
+      <add :index="0" @add="add"></add>
     </div>
     <template v-else>
-      <component v-for="(item, index) in children" :key="item.id" :is="item.type"
-                 :params="item"
-                 @remove="remove(item.id)">
-      </component>
+      <div v-for="(item, index) in children" :key="item.id">
+        <add :index="index" @add="add"></add>
+        <component
+          :is="item.type"
+          :params="item"
+          @remove="remove(item.id)">
+        </component>
+
+      </div>
+      <add :index="params.children.length" @add="add"></add>
     </template>
+
   </div>
 </template>
 
 <script>
   import mixin from '../base/mixin.js'
+  import {bus, event} from '../util/event_bus'
 
   export default {
     name: 'Row',
@@ -33,12 +39,8 @@
       children() {
         let t = []
         this.params.children.forEach((item, index) => {
-          t.push({type: 'add', data: {parent: this.params.children, index: parseInt(index)}})
           t.push(item)
         })
-
-        t.push({type: 'add', data: {parent: this.params.children, index: 99999}})
-
         return t
       },
     },
@@ -52,6 +54,12 @@
         if (index >= 0) {
           this.params.children.splice(index, 1)
         }
+
+        bus.$emit(event.LayoutChanged + this.data._layoutId)
+      },
+      add({index, item}) {
+        this.params.children.splice(index, 0, item)
+        bus.$emit(event.LayoutChanged + this.data._layoutId)
       }
     },
     mounted() {

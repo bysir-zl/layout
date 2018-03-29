@@ -92,14 +92,14 @@
           if (layout.layout) {
             item = layouts[layout.i]
             if (!item) {
-              console.warn("can't found layout id:"+layout.i)
+              console.warn("can't found layout id:" + layout.i)
               return null
             }
             item.type = 'layout'
           } else {
             let it = items[layout.i]
             if (!it) {
-              console.warn("can't found item id:"+layout.i)
+              console.warn("can't found item id:" + layout.i)
               return null
             }
             it._layoutId = layoutId
@@ -111,7 +111,6 @@
 
             if (layout.c) {
               let c = []
-              console.log("layout.c",layout.c)
               for (let i in layout.c) {
                 let l = layout.c[i]
                 let r = fullChildren(l)
@@ -129,26 +128,31 @@
         }
 
         return fullChildren(this.params.layout)
-      }
+      },
+      init() {
+        bus.$on(event.ItemChanged + this.params.id, ({id, item}) => {
+          console.log("item changed, ", this.params.id, id, item)
+        })
+        bus.$on(event.LayoutChanged + this.params.id, () => {
+          console.log("layout changed, ", this.params.id)
+        })
 
+        this.root = this.buildRoot()
+      }
     },
     mounted() {
-      bus.$on(event.ItemChanged + this.params.id, ({id, item}) => {
-        console.log("item changed, ", this.params.id, id, item)
-      })
-      bus.$on(event.LayoutChanged + this.params.id, ({layout}) => {
-        console.log("layout changed, ", this.params.id, layout)
-      })
-      this.root = this.buildRoot()
-
+      this.init()
     },
     watch: {
-      params() {
+      params(n, o) {
         // 为何不用computed属性?
         //  computed属性不会给对象生成getset, 所以不会有响应式.
         //  如果直接赋值就会自动给对象生成getset
         //  有点不优雅, 考虑一下?
-        this.root = this.buildRoot()
+        bus.$off(event.ItemChanged + o.id)
+        bus.$off(event.LayoutChanged + o.id)
+
+        this.init()
       }
     }
   }

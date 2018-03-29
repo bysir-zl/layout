@@ -5,9 +5,6 @@
       <div v-for="(width,index) in widths" class="col" :class="'col-'+width">
         <component v-if="children[index]" :is="children[index].type" :params="children[index]" @remove="remove(children[index].id)"></component>
       </div>
-      <!--<div v-for="(item,index) in children" class="col" :class="'col-'+widths[index]">-->
-        <!--<component :is="item.type" :params="item" @remove="remove(item.id)"></component>-->
-      <!--</div>-->
     </div>
     <div class="edit" ref="btn">edit column</div>
 
@@ -105,13 +102,13 @@
 
         } else if (deleteCount < 0) {
           // // 添加空row
-          // let newItems = []
-          // for (let i = 0; i < -deleteCount; i++) {
-          //   let itemId = util.genId()
-          //   newItems.push({id: itemId, type: 'row', data: {id: itemId, type: 'row'}, children: []})
-          // }
-          //
-          // this.params.children.splice(childrenCount, 0, ...newItems)
+          let newItems = []
+          for (let i = 0; i < -deleteCount; i++) {
+            let itemId = util.genId()
+            newItems.push({id: itemId, type: 'row', data: {id: itemId, type: 'row'}, children: []})
+          }
+
+          this.params.children.splice(childrenCount, 0, ...newItems)
         }
       }
     },

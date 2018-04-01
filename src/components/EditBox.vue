@@ -207,15 +207,15 @@
 
   .editor-fixed {
     position: fixed;
-    right: 50px;
-    top: 50px;
-    width: 330px;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 320px;
     overflow-y: auto;
-    background-color: #fff;
+    background-color: #f6f6f6;
     z-index: 100;
 
-    box-shadow: 0 0 18px 0 rgba(22, 45, 61, 0.27);
-    border-radius: 10px;
+    /*box-shadow:inset 0 0 18px 0 rgba(22, 45, 61, 0.27);*/
     .mask {
       z-index: -1;
       position: fixed;
@@ -245,7 +245,8 @@
       }
       .body {
         padding: 10px;
-        height: 530px;
+        height: calc(100vh - 105px);
+        /*height: 530px;*/
         overflow-y: auto;
         .num {
           > span {
@@ -276,6 +277,9 @@
       }
       .footer {
         padding: 10px;
+        /*position: fixed;*/
+        width: 100%;
+        bottom: 0;
       }
     }
   }

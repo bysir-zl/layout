@@ -1,8 +1,12 @@
 <template>
   <div @click="click" class="editor">
-    <div>editor start</div>
-    <layout :params="layout"></layout>
-    <div>editor end</div>
+    <el-container>
+      <el-main>
+        <layout :params="layout"></layout>
+      </el-main>
+
+      <el-aside width="320px"></el-aside>
+    </el-container>
   </div>
 </template>
 

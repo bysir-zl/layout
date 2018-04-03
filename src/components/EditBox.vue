@@ -183,6 +183,7 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
   .editor-box {
+    z-index: 2;
     position: absolute;
     display: block;
     width: calc(100% + 4px);
@@ -190,15 +191,16 @@
     top: -2px;
     left: -2px;
 
-    border: 1px solid #64a4ff;
+    border: 2px solid #64a4ff;
+    box-shadow: 0px 0px 20px rgba(79, 101, 174, 0.15);
     .info {
       position: absolute;
       background-color: #64a4ff;
       font-size: 13px;
       height: 15px;
       line-height: 15px;
-      top: -15px;
-      left: -1px;
+      top: -16px;
+      left: -2px;
       border-radius: 0;
       padding: 0 4px;
       color: #fff;

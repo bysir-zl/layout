@@ -87,6 +87,7 @@
           }
 
           let item
+          // 是布局组件
           if (layout.layout) {
             item = layouts[layout.i]
             if (!item) {
@@ -95,6 +96,7 @@
             }
             item.type = 'layout'
           } else {
+            // 不是布局组件
             let it = items[layout.i]
             if (!it) {
               console.warn("can't found item id:" + layout.i)
@@ -107,6 +109,8 @@
               data: it,
             }
 
+            // 默认赋值一个children, 也容器组件中就难得判断了
+            item.children = []
             if (layout.c) {
               let c = []
               for (let i in layout.c) {
@@ -157,7 +161,6 @@
             return l
           }
 
-          console.log("root", this.root)
 
           let post = {
             id: this.params.id,

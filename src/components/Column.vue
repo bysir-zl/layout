@@ -3,13 +3,14 @@
   <div class="self show-border editor-padding" @click="click" :style="style" :class="classes">
     <div class="row">
       <div v-for="(width,index) in widths" class="col" :class="'col-'+width">
-        <component v-if="children[index]" :is="children[index].type" :params="children[index]" @remove="remove(children[index].id)"></component>
+        <component v-if="children[index]" :is="children[index].type" :params="children[index]"
+                   @remove="remove(children[index].id)"></component>
       </div>
     </div>
     <div class="edit" ref="btn">edit column</div>
 
     <edit-box v-if="active" @close="active=false" :data="data" :config="editConfig" title="column"
-              @input="onEdit" @save="onSave"></edit-box>
+              @input="onEdit" @save="onSave" @remove="$emit('remove')"></edit-box>
   </div>
 </template>
 
@@ -81,6 +82,8 @@
       onSave(s) {
         // todo column的数据改变,可能会影响到布局
         this.data = s
+
+        bus.$emit(event.ItemChanged + this.data._layoutId, s)
       },
       remove(id) {
         let index = _.findIndex(this.data.children, i => i.id === id)
@@ -102,13 +105,23 @@
 
         } else if (deleteCount < 0) {
           // // 添加空row
-          let newItems = []
+          let addItems = []
           for (let i = 0; i < -deleteCount; i++) {
-            let itemId = util.genId()
-            newItems.push({id: itemId, type: 'row', data: {id: itemId, type: 'row'}, children: []})
+            addItems.push({id: 0, type: 'row'})
           }
 
-          this.params.children.splice(childrenCount, 0, ...newItems)
+          this.axios.post("/v1/item/multi", addItems).then(({data}) => {
+            let newItems = []
+            data.forEach((item) => {
+
+              item._layoutId = this.data._layoutId
+              newItems.push({id: item.id, type: 'row', data: item, children: []})
+            })
+            this.params.children.splice(childrenCount, 0, ...newItems)
+
+            bus.$emit(event.LayoutChanged + this.data._layoutId)
+
+          })
         }
       }
     },

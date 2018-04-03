@@ -60,7 +60,7 @@
         bus.$emit(event.LayoutChanged + this.data._layoutId)
       },
       add({index, item}) {
-        this.params.children.splice(index, 0, item)
+
         // 异步请求并更新id
         let post = _.cloneDeep(item.data)
         post.id = 0
@@ -68,9 +68,13 @@
         this.axios.post("/v1/item", post).then(({data}) => {
           item.id = data.id
           item.data.id = data.id
+          item.data._layoutId = this.data._layoutId
+
+          this.params.children.splice(index, 0, item)
 
           bus.$emit(event.ItemAdded + this.data._layoutId, item)
           bus.$emit(event.LayoutChanged + this.data._layoutId)
+          console.log("row add",item.data)
         })
       },
       '$class'() {
@@ -81,7 +85,7 @@
       },
     },
     mounted() {
-
+      console.log("row mounted",this.data._layoutId)
     },
 
   }

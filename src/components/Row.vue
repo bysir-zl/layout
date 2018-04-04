@@ -2,8 +2,7 @@
 <!-- data.center=true 则居中布局-->
 
 <template>
-  <div :id="'item-'+this.id" :style="style" @click="click" :class="classes" data-type="row"
-       class="show-border editor-padding">
+  <div :id="'item-'+this.id" data-type="row" @click="click" :style="style" :class="classes"  class="show-border editor-padding">
     <div v-if="params.children.length===0" class="placeholder">
       <add :index="0" @add="add"></add>
     </div>
@@ -74,7 +73,6 @@
 
           bus.$emit(event.ItemAdded + this.data._layoutId, item)
           bus.$emit(event.LayoutChanged + this.data._layoutId)
-          console.log("row add",item.data)
         })
       },
       '$class'() {
@@ -85,7 +83,7 @@
       },
     },
     mounted() {
-      console.log("row mounted",this.data._layoutId)
+
     },
 
   }

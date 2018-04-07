@@ -2,21 +2,28 @@
 <!-- data.center=true 则居中布局-->
 
 <template>
-  <div :id="'item-'+this.id" data-type="row" @click="click" :style="style" :class="classes"  class="show-border editor-padding">
-    <div v-if="params.children.length===0" class="placeholder">
+  <div :id="'item-'+params.layout.i" data-type="row" :style="style" :class="classes"
+       class="self show-border editor-padding">
+    <span class="pin" @click="click"></span>
+    <div v-if="!params.layout.c || params.layout.c.length===0" class="placeholder">
       <add :index="0" @add="add"></add>
     </div>
     <template v-else>
-      <div v-for="(item, index) in children" :key="item.id">
+      <div v-for="(layout, index) in params.layout.c" :key="layout.i">
         <add :index="index" @add="add"></add>
         <component
-          :is="item.type"
-          :params="item"
-          @remove="remove(item.id)">
+          v-if="params.items[layout.i]"
+          :is="params.items[layout.i].type"
+          :params="{items:params.items,layout:layout}"
+          :root="root"
+          @remove="remove(layout.i)">
         </component>
+        <span v-else>
+          not found {{layout.i}}
+        </span>
 
       </div>
-      <add :index="params.children.length" @add="add"></add>
+      <add :index="params.layout.c.length" @add="add"></add>
     </template>
 
   </div>
@@ -26,29 +33,51 @@
   import mixin from '../base/mixin.js'
   import {bus, event} from '../util/event_bus'
 
+  /*
+  params:
+      {
+      'items',
+      'layout'
+      }
+      */
+
   export default {
     name: 'Row',
     mixins: [mixin.style],
     props: [
       'params',
+      'root',
     ],
 
     data() {
-      return {}
+      return {
+        editConfig: {
+          'data.center': {
+            label: '居中',
+            type: 'bool'
+          },
+        },
+      }
     },
     computed: {
-      children() {
-        let t = []
-        this.params.children.forEach((item, index) => {
-          t.push(item)
-        })
-        return t
-      },
+
     },
     methods: {
       click(e) {
-//        bus.$emit(event.SomethingClicked, this)
-//        e.stopPropagation()
+        bus.$emit(event.EditorBox, {
+          data: this.item,
+          config: this.editConfig,
+          onInput: this.onInput,
+          onSave: this.onSave,
+          title: 'row',
+        })
+
+      },
+      onInput(s) {
+        this.item = s
+      },
+      onSave(s) {
+        this.item = s
       },
       remove(id) {
         let index = _.findIndex(this.params.children, i => i.data.id === id)
@@ -64,19 +93,14 @@
         let post = _.cloneDeep(item.data)
         post.id = 0
 
-        this.axios.post("/v1/item", post).then(({data}) => {
-          item.id = data.id
-          item.data.id = data.id
-          item.data._layoutId = this.data._layoutId
-
-          this.params.children.splice(index, 0, item)
-
-          bus.$emit(event.ItemAdded + this.data._layoutId, item)
-          bus.$emit(event.LayoutChanged + this.data._layoutId)
+        this.root.addItem(post, (i) => {
+          this.params.layout.c.splice(index, 0, {i:i.id,c:[]})
+          this.root.updateLayout()
         })
+
       },
       '$class'() {
-        if (this.data.data && this.data.data.center) {
+        if (this.item.data && this.item.data.center) {
           return ["container"]
         }
         return []
@@ -93,5 +117,24 @@
   .placeholder {
     padding: 20px 10px;
   }
+
+  .self {
+    padding-top: 12px;
+    position: relative;
+  }
+
+  .pin {
+    position: absolute;
+    left: 1px;
+    top: 1px;
+    z-index: 10;
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 10px;
+    background-color: #35b1eb;
+    cursor: pointer;
+  }
+
 
 </style>

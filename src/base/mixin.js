@@ -1,3 +1,4 @@
+import Vue from 'vue'
 export default {
   style: {
     data() {
@@ -18,18 +19,18 @@ export default {
       // style只会在用户自定义style才会使用, 所以每个组件都是统一的
       style() {
         // return {}
-        if (!this.data.design || !this.data.design.custom || !this.data.design.custom.style) {
+        if (!this.item.design || !this.item.design.custom || !this.item.design.custom.style) {
           return []
         }
 
-        return this.data.design.custom.style
+        return this.item.design.custom.style
       },
       // 计算要使用的class, 由 用户自定义 + 每个组件自己的逻辑 得到
       classes() {
         // return []
         let base = []
-        if (this.data.design) {
-          if (this.data.design.custom && this.data.design.custom.classes) {
+        if (this.item.design) {
+          if (this.item.design.custom && this.item.design.custom.classes) {
             base = this.data.design.custom.classes
           }
         }
@@ -40,16 +41,16 @@ export default {
       },
 
       id() {
-        return this.params.data.id
+        return this.params.layout.i
       },
-      data: {
+      item:{
         get() {
-          return this.params.data ? this.params.data : {}
+          return this.params.items[this.params.layout.i]
         },
         set(v) {
-          this.params.data = v
+          Vue.set(this.params.items,this.params.layout.i,v)
         }
-      }
+      },
     }
   }
 }

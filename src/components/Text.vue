@@ -1,12 +1,11 @@
 <template>
-  <div class="self" data-comp="text" :id="'item-'+data.id">
+  <div class="self" data-comp="text" :id="'item-'+item.id">
     <div class="data" :style="style" :class="classes" @click="click">
-      <div v-html="data.data.text"></div>
-      <video v-if="data.design&&data.design.advanced.background&&data.design.advanced.background.type === 'video'"
-             class="video-bg" loop autoplay :src="data.design.advanced.background.video"></video>
+      <div v-html="item.data.text"></div>
+      <video v-if="item.design&&item.design.advanced.background&&item.design.advanced.background.type === 'video'"
+             class="video-bg" loop autoplay :src="item.design.advanced.background.video"></video>
     </div>
-    <edit-box v-if="active" @close="active=false" :data="data" :config="editConfig" title="text"
-              @input="onEdit" @save="onSave" @remove="$emit('remove')"></edit-box>
+
   </div>
 </template>
 
@@ -25,6 +24,7 @@
     mixins: [mixin.style],
     props: [
       'params',
+      'root',
     ],
     data() {
       return {
@@ -69,38 +69,48 @@
 
       }
     },
-    computed: {},
+    computed: {
+
+    },
     methods: {
       click(e) {
-        this.active = true
-        bus.$emit(event.SomethingClicked, this)
-        e.stopPropagation()
-
-        bus.$once(event.SomethingClicked, (components) => {
-          if (components === this) {
-            return
-          }
-          this.active = false
+        bus.$emit(event.EditorBox,{
+          data:this.item,
+          config:this.editConfig,
+          onInput:this.onEdit,
+          onSave:this.onSave,
+          title:'text',
         })
+
+//        this.active = true
+//        bus.$emit(event.SomethingClicked, this)
+//        e.stopPropagation()
+//
+//        bus.$once(event.SomethingClicked, (components) => {
+//          if (components === this) {
+//            return
+//          }
+//          this.active = false
+//        })
       },
 
       onEdit(s) {
-        this.data = s
+        this.item = s
       },
       onSave(s) {
-        this.data = s
-
-        bus.$emit(event.ItemChanged + this.data._layoutId, s)
+        this.item = s
+        this.root.updateItem(s)
+//        bus.$emit(event.ItemChanged + this.data._layoutId, s)
       },
       '$class'() {
-        if (!this.data.design) {
+        if (!this.item.design) {
           return []
         }
-        return obj2array(this.data.design.model, '-')
+        return obj2array(this.item.design.model, '-')
       },
       // 重新渲染, 一般在data改变后操作
       reRenderCss() {
-        if (!this.data.design || !this.data.design.css) {
+        if (!this.item.design || !this.item.design.css) {
           return
         }
         // 当在发布模式下, css已经缓存下来了, 就不需要处理的.
@@ -109,12 +119,12 @@
         }
 
         // 处理高级样式
-        let x = _.cloneDeep(this.data.design.css)
-        if (this.data.design && this.data.design.advanced) {
-          if (this.data.design.advanced.background.type === 'img') {
-            x.background = 'url(' + this.data.design.advanced.background.img + ')'
-          } else if (this.data.design.advanced.background.type === 'color') {
-            x.background = this.data.design.advanced.background.color
+        let x = _.cloneDeep(this.item.design.css)
+        if (this.item.design && this.item.design.advanced) {
+          if (this.item.design.advanced.background.type === 'img') {
+            x.background = 'url(' + this.item.design.advanced.background.img + ')'
+          } else if (this.item.design.advanced.background.type === 'color') {
+            x.background = this.item.design.advanced.background.color
           }
         }
 
@@ -123,7 +133,7 @@
     },
     watch: {
       // 在data变化后需要生成新的css
-      'data'(n, o) {
+      'item'(n, o) {
         if (n === o) {
           return
         }
@@ -146,6 +156,7 @@
 
   .self {
     position: relative;
+    cursor: pointer;
   }
 
   .data {

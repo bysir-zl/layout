@@ -1,16 +1,24 @@
 <!--列组件, 也就是横向布局容器-->
 <template>
-  <div class="self show-border editor-padding" @click="click" :style="style" :class="classes">
+  <div class="self show-border editor-padding" :style="style" :class="classes">
+    <div class="pin" @click="click" @mouseenter="mouseenter" @mouseleave="mouseleave">
+      <span class="pin-icon">
+        <span v-if="active || preActive" class="pin-name">col</span>
+      </span>
+    </div>
+
     <div class="row">
       <div v-for="(width,index) in widths" class="col" :class="'col-'+width">
-        <component v-if="children[index]" :is="children[index].type" :params="children[index]"
-                   @remove="remove(children[index].id)"></component>
+        <component
+          v-if="params.layout.c[index] && params.items[params.layout.c[index].i]"
+          :is="params.items[params.layout.c[index].i].type"
+          :params="{items:params.items,layout:params.layout.c[index]}"
+          :root="root"
+          @remove="remove(params.layout.c[index].i)"></component>
       </div>
     </div>
-    <div class="edit" ref="btn">edit column</div>
 
-    <edit-box v-if="active" @close="active=false" :data="data" :config="editConfig" title="column"
-              @input="onEdit" @save="onSave" @remove="$emit('remove')"></edit-box>
+    <div :class="{'active':active,'pre-active':!active && preActive}" v-if="active || preActive"></div>
   </div>
 </template>
 
@@ -25,10 +33,12 @@
     mixins: [mixin.style],
     props: [
       'params',
+      'root',
     ],
     data() {
       return {
         active: false,
+        preActive: false,
         editConfig: {
           'data.widths': {
             label: '列数',
@@ -41,49 +51,51 @@
               value: ['', ''],
             }]
           },
-        }
+        },
+        openPin: false,
       }
     },
     computed: {
-      children() {
-        let t = []
-        if (this.params.children) {
-          this.params.children.forEach((item, index) => {
-            t.push(item)
-          })
-        }
-
-        return t
-      },
       widths() {
-        return this.data.data.widths
+        return this.item.data.widths
+      },
+      item() {
+        return this.params.items[this.params.layout.i]
       }
     },
     methods: {
       click(e) {
-        if (e.target !== this.$refs.btn) {
-          return
-        }
-        e.stopPropagation()
-
         this.active = true
-        bus.$emit(event.SomethingClicked, this)
-
-        bus.$once(event.SomethingClicked, (components) => {
-          if (components === this) {
-            return
-          }
-          this.active = false
+        bus.$emit(event.EditorBox, {
+          data: this.item,
+          config: this.editConfig,
+          onInput: this.onEdit,
+          onSave: this.onSave,
+          onClose: () => {
+            this.active = false
+          },
+          onOpen: () => {
+            this.active = true
+          },
+          title: 'text',
         })
       },
+      mouseenter() {
+        this.preActive = true
+        console.log('mouseenter')
+      },
+      mouseleave() {
+        this.preActive = false
+        console.log('mouseleave')
+      },
       onEdit(s) {
-        this.data = s
+        this.item = s
       },
       onSave(s) {
         // todo column的数据改变,可能会影响到布局
-        this.data = s
+        this.item = s
+        this.root.updateItem(s)
 
-        bus.$emit(event.ItemChanged + this.data._layoutId, s)
       },
       remove(id) {
         let index = _.findIndex(this.data.children, i => i.id === id)
@@ -95,10 +107,10 @@
       // 如果width小于儿子, 那么不需要删除儿子, 因为可能只是用户在预览.
       fullChildren() {
         let max = 0
-        if (this.data.data && this.data.data.widths) {
-          max = this.data.data.widths.length
+        if (this.item.data && this.item.data.widths) {
+          max = this.item.data.widths.length
         }
-        let childrenCount = this.params.children.length
+        let childrenCount = this.params.layout.c.length
         let deleteCount = childrenCount - max
 
         if (deleteCount > 0) {
@@ -129,7 +141,7 @@
       this.fullChildren()
     },
     watch: {
-      'data'(n, o) {
+      'item'(n, o) {
         if (n === o) {
           return
         }
@@ -144,7 +156,28 @@
 
 <style scoped lang="less">
   .self {
+    padding-top: 12px;
     position: relative;
+  }
+
+  .active {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: calc(100% + 2px);
+    height: calc(100% + 2px);
+
+    border: 1px solid #35b1eb;
+  }
+
+  .pre-active {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: calc(100% + 2px);
+    height: calc(100% + 2px);
+
+    border: 1px dashed #35b1eb;
   }
 
   .edit {
@@ -159,5 +192,26 @@
     text-align: center;
   }
 
+  .pin {
+    position: absolute;
+    left: 1px;
+    top: 1px;
+    z-index: 10;
+    line-height: 10px;
+    .pin-icon {
+      display: inline-block;
+      min-width: 10px;
+      height: 10px;
+      border-radius: 10px;
+      background-color: #35b1eb;
+      cursor: pointer;
+      content: '';
+    }
+    .pin-name {
+      font-size: 12px;
+      color: #fff;
+      padding: 0px 3px;
+    }
+  }
 
 </style>

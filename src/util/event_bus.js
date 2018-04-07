@@ -7,7 +7,8 @@ const event = {
   ItemChanged: 'IC:', // 某个item的数据改变了, body{id:1,data:{id:1,type:'',data:{}}}. 在一个布局器中使用, 这个key后需要跟上布局器id
   ItemAdded: 'IA:', //
   ItemRemove: 'IR:', //
-  LayoutChanged: 'LC:' // layout改变了, body{layout:[]}. 在一个布局器中使用, 这个key后需要跟上布局器id
+  LayoutChanged: 'LC:', // layout改变了, body{layout:[]}. 在一个布局器中使用, 这个key后需要跟上布局器id
+  EditorBox: 'EB', // layout改变了, body{layout:[]}. 在一个布局器中使用, 这个key后需要跟上布局器id
 }
 
 export {

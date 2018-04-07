@@ -1,12 +1,9 @@
 <template>
   <div @click="click" class="editor">
-    <el-container>
-      <el-main>
-        <layout :params="layout"></layout>
-      </el-main>
 
-      <el-aside width="320px"></el-aside>
-    </el-container>
+        <layout :params="params"></layout>
+        <edit-box></edit-box>
+
   </div>
 </template>
 
@@ -17,11 +14,10 @@
     name: 'Editor',
     data() {
       return {
-        layout: {
+        params: {
           id: 0,
           layout: {},
           items: {},
-          reuse: {}
         },
       }
     },
@@ -102,6 +98,7 @@
         layouts: {
           44: {
             id: 44,
+            type:'layout',
             layout:
               {
                 i: 21,
@@ -152,7 +149,7 @@
 //      this.layout = layout
 
       this.axios.get("/v1/page/layout?id=1").then(({data}) => {
-        this.layout = data
+        this.params = data
       })
 
       // setTimeout(() => {

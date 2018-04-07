@@ -1,13 +1,13 @@
 <template>
-  <div>
-    <div class="editor-box">
-      <div class="info">{{title}}</div>
-      <div class="button">
-        <button @click="$emit('remove')">删除</button>
-      </div>
-    </div>
+  <div v-if="active">
+    <!--<div class="editor-box">-->
+    <!--<div class="info">{{title}}</div>-->
+    <!--<div class="button">-->
+    <!--<button @click="$emit('remove')">删除</button>-->
+    <!--</div>-->
+    <!--</div>-->
+    <div class="mask" v-if="showMask"></div>
     <div class="editor-fixed">
-      <div class="mask"></div>
       <div class="editor">
         <div class="head">
           {{title}}
@@ -53,6 +53,14 @@
                 :label="i.value" @input="input">{{i.label}}
               </el-radio>
             </div>
+            <div v-else-if="v.type==='bool'">
+              <el-radio
+                v-for="i in [true,false]"
+                :key="i"
+                v-model="tempData[k]"
+                :label="i" @input="input">{{i.label}}
+              </el-radio>
+            </div>
           </div>
         </div>
         <div class="footer">
@@ -68,20 +76,30 @@
   // data:{config:{
   //  data
   // },data:{}}
+  import {bus, event} from '../util/event_bus'
+
 
   export default {
     name: 'EditBox',
-    props: [
-      'data', // 要修改的数据
-      'config',// 数据类型
-      'title',
-    ],
+    props: [],
     data() {
       return {
         tempData: {},
         oldData: {},
-        x: 'o',
+        active: false,
         bg: {},
+        showMask: false,// 是否显示遮罩层, 在修改了任何元素就显示
+
+        top: 0,
+
+
+        config: {},
+        title: '',
+        data: {},
+        onInput: null,
+        onSave: null,
+        onClose: null,
+        onOpen: null,
       }
     },
     methods: {
@@ -89,23 +107,53 @@
         // 这里settimeout是因为在部分控件触发@input="input"的时候, v-model还没来得及改变
         setTimeout(() => {
           let x = this.tranDataZ(this.oldData, this.tempData)
-          this.$emit('input', x)
+          this.onInput && this.onInput(x)
+
+          this.showMask = true
         }, 10)
       },
       save() {
         let x = this.tranDataZ(this.oldData, this.tempData)
-        this.$emit('save', x)
-        this.$emit('close', false)
+
+        this.active = false
+        this.onSave && this.onSave(x)
+        this.afterClose()
       },
       reset() {
-        this.$emit('input', _.cloneDeep(this.oldData))
-      },
-      cancel() {
-        this.$emit('input', this.oldData)
+        this.onInput && this.onInput(_.cloneDeep(this.oldData))
+        this.showMask = false
       },
       close() {
-        this.cancel()
-        this.$emit('close', false)
+        this.onInput && this.onInput(this.oldData)
+        this.active = false
+        this.showMask = false
+
+        this.$nextTick(this.afterClose)
+      },
+      afterOpen() {
+        let bodyEl = document.body
+        if (!bodyEl.style.top) {
+          this.top = window.scrollY
+
+          bodyEl.style.position = 'fixed'
+          bodyEl.style.top = -this.top + 'px'
+          bodyEl.style.paddingRight = '17px'
+        }
+
+        this.onOpen && this.onOpen()
+      },
+      afterClose() {
+        let bodyEl = document.body
+        bodyEl.style.position = ''
+        bodyEl.style.top = ''
+        bodyEl.style.paddingRight = ''
+
+        window.scrollTo(0, this.top) // 回到原先的top
+
+        this.showMask = false
+
+        this.onClose && this.onClose()
+
       },
       tranData(x) {
         let y = {}
@@ -173,10 +221,27 @@
     },
     created() {
       // 将当前数据copy一份
-      this.oldData = _.cloneDeep(this.data)
 
-      this.tempData = this.tranData(this.data)
-    }
+      bus.$on(event.EditorBox, ({data, config, onClose,onOpen, onInput, onSave, title}) => {
+        this.onClose && this.onClose()
+
+        this.active = true
+
+        this.data = data
+        this.config = config
+        this.onInput = onInput
+        this.onSave = onSave
+        this.title = title
+        this.onClose = onClose
+        this.onOpen = onOpen
+
+        this.oldData = _.cloneDeep(this.data)
+        this.tempData = this.tranData(this.data)
+
+        this.$nextTick(this.afterOpen)
+
+      })
+    },
   }
 </script>
 
@@ -191,7 +256,6 @@
     top: -2px;
     left: -2px;
 
-    border: 2px solid #64a4ff;
     box-shadow: 0px 0px 20px rgba(79, 101, 174, 0.15);
     .info {
       position: absolute;
@@ -207,26 +271,28 @@
     }
   }
 
+  .mask {
+    z-index: 1;
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.14);
+  }
+
   .editor-fixed {
     position: fixed;
-    right: 0;
-    top: 0;
-    bottom: 0;
+    right: 30px;
+    top: 30px;
     width: 320px;
     overflow-y: auto;
     background-color: #f6f6f6;
     z-index: 100;
+    border-radius: 10px;
 
-    /*box-shadow:inset 0 0 18px 0 rgba(22, 45, 61, 0.27);*/
-    .mask {
-      z-index: -1;
-      position: fixed;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-    }
+    box-shadow: 0 0 18px 0 rgba(22, 45, 61, 0.27);
+
     .editor {
       position: relative;
 
@@ -247,7 +313,7 @@
       }
       .body {
         padding: 10px;
-        height: calc(100vh - 105px);
+        height: 500px;
         /*height: 530px;*/
         overflow-y: auto;
         .num {

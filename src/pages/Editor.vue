@@ -1,9 +1,7 @@
 <template>
   <div @click="click" class="editor">
-
-        <layout :params="params"></layout>
-        <edit-box></edit-box>
-
+    <layout :params="params"></layout>
+    <edit-box></edit-box>
   </div>
 </template>
 
@@ -21,9 +19,7 @@
         },
       }
     },
-    computed: {
-
-    },
+    computed: {},
     methods: {
       click(ele) {
 
@@ -50,7 +46,7 @@
                 {i: 2},
               ]
             },
-            {i: 44, layout: true},
+            {i: 44},
             {i: 2},
           ]
         }
@@ -93,12 +89,10 @@
                 // style: {'color': '#37e'}, classes: []
               },
             },
-          }
-        },
-        layouts: {
+          },
           44: {
             id: 44,
-            type:'layout',
+            type: 'layout',
             layout:
               {
                 i: 21,
@@ -146,7 +140,7 @@
         }
       }
 
-//      this.layout = layout
+//      this.params = layout
 
       this.axios.get("/v1/page/layout?id=1").then(({data}) => {
         this.params = data

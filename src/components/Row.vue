@@ -11,13 +11,25 @@
     <template v-else>
       <div v-for="(layout, index) in params.layout.c" :key="layout.i">
         <add :index="index" @add="add"></add>
-        <component
-          v-if="params.items[layout.i]"
-          :is="params.items[layout.i].type"
-          :params="{items:params.items,layout:layout}"
-          :root="root"
-          @remove="remove(layout.i)">
-        </component>
+        <template v-if="params.items[layout.i]">
+          <!--如果是布局组件，则使用布局组件的布局-->
+          <component
+            v-if="params.items[layout.i].type==='layout'"
+            :is="params.items[layout.i].type"
+            :params="params.items[layout.i]"
+            :root="root"
+            @remove="remove(layout.i)">
+          </component>
+          <!--否则就使用由上到下继承下来的布局-->
+          <component
+            v-else
+            :is="params.items[layout.i].type"
+            :params="{id:layout.i,items:params.items,layout:layout}"
+            :root="root"
+            @remove="remove(layout.i)">
+          </component>
+
+        </template>
         <span v-else>
           not found {{layout.i}}
         </span>
@@ -59,9 +71,7 @@
         },
       }
     },
-    computed: {
-
-    },
+    computed: {},
     methods: {
       click(e) {
         bus.$emit(event.EditorBox, {
@@ -94,7 +104,7 @@
         post.id = 0
 
         this.root.addItem(post, (i) => {
-          this.params.layout.c.splice(index, 0, {i:i.id,c:[]})
+          this.params.layout.c.splice(index, 0, {i: i.id, c: []})
           this.root.updateLayout()
         })
 

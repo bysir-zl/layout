@@ -9,12 +9,16 @@
 
     <div class="row">
       <div v-for="(width,index) in widths" class="col" :class="'col-'+width">
-        <component
-          v-if="params.layout.c[index] && params.items[params.layout.c[index].i]"
-          :is="params.items[params.layout.c[index].i].type"
-          :params="{items:params.items,layout:params.layout.c[index]}"
-          :root="root"
-          @remove="remove(params.layout.c[index].i)"></component>
+        <template v-if="params.layout.c[index] && params.items[params.layout.c[index].i]">
+          <!--如果是布局组件，则使用布局组件的布局-->
+          <component
+            v-if="params.items[params.layout.c[index].i].type!=='layout'"
+            :params="{items:params.items,layout:params.layout.c[index]}"
+            :root="root"
+            @remove="remove(params.layout.c[index].i)">
+          </component>
+
+        </template>
       </div>
     </div>
 

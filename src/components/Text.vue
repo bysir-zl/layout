@@ -11,6 +11,7 @@
 
 <script>
 
+  import Vue from 'vue'
   import mixin from '../base/mixin.js'
   import {bus, event} from '../util/event_bus'
   import obj2array from '../util/obj2array'
@@ -69,10 +70,16 @@
     methods: {
       click(e) {
         bus.$emit(event.EditorBoxOpen, {
-          data: this.item,
+          items:this.params.items,
+          layout:this.params.layout,
           config: this.editConfig,
-          onInput: this.onEdit,
-          onSave: this.onSave,
+          onInput:(s)=>{
+            Vue.set(this.params.items, s.id, s)
+          },
+          onSave: (s) => {
+            Vue.set(this.params.items, s.id, s)
+            this.root.updateItem(s)
+          },
           title: 'text',
         })
 
@@ -88,14 +95,7 @@
 //        })
       },
 
-      onEdit(s) {
-        this.item = s
-      },
-      onSave(s) {
-        this.item = s
-        this.root.updateItem(s)
-//        bus.$emit(event.ItemChanged + this.data._layoutId, s)
-      },
+
       '$class'() {
         if (!this.item.design) {
           return []

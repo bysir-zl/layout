@@ -64,6 +64,7 @@
           },
           '2': {
             id: 2,
+            alias:'title',
             type: 'z-text',
             data: {
               text: '<h1>HELLO LAYOUT</h1>'

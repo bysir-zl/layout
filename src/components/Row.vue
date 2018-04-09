@@ -42,6 +42,7 @@
 </template>
 
 <script>
+  import Vue from 'vue'
   import mixin from '../base/mixin.js'
   import {bus, event} from '../util/event_bus'
 
@@ -63,12 +64,19 @@
 
     data() {
       return {
+        // 对于复合组件的config可能是由设计师编写的, 是从后台获取的
         editConfig: [
           {
             key: 'data.center',
             label: '居中',
             type: 'bool'
           },
+          {
+            componentAlias: 'title',
+            label: '标题',
+            key: 'data.text',
+            type: 'text'
+          }
         ],
       }
     },
@@ -76,17 +84,21 @@
     methods: {
       click(e) {
         bus.$emit(event.EditorBoxOpen, {
-          data: this.item,
+          items:this.params.items,
+          layout:this.params.layout,
           config: this.editConfig,
-          onInput: this.onInput,
-          onSave: this.onSave,
+          onInput:(s)=>{
+            Vue.set(this.params.items, s.id, s)
+          },
+          onSave: (s) => {
+            Vue.set(this.params.items, s.id, s)
+            this.root.updateItem(s)
+          },
           title: 'row',
         })
 
       },
-      onInput(s) {
-        this.item = s
-      },
+
       onSave(s) {
         this.item = s
       },

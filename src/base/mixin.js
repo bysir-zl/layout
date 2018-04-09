@@ -48,7 +48,7 @@ export default {
           return this.params.items[this.params.layout.i]
         },
         set(v) {
-          Vue.set(this.params.items,this.params.layout.i,v)
+          Vue.set(this.params.items,v.id,v)
         }
       },
     }

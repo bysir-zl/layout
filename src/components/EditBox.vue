@@ -24,44 +24,50 @@
             <div v-if="v.type==='fullText'">
               <el-input type="textarea"
                         :rows="4"
-                        v-model="tempData[v.key]" @input="input"></el-input>
+                        v-model="tempData[v.componentAlias][v.key]" @input="input(v)"></el-input>
             </div>
             <div v-else-if="v.type==='text'">
-              <el-input v-model="tempData[v.key]" @input="input"></el-input>
+              <el-input v-model="tempData[v.componentAlias][v.key]" @input="input(v)"></el-input>
             </div>
             <div v-else-if="v.type==='color'">
-              <el-input v-model="tempData[v.key]" @input="input"></el-input>
+              <el-input v-model="tempData[v.componentAlias][v.key]" @input="input(v)"></el-input>
             </div>
             <div v-else-if="v.type==='background'">
-              <el-radio v-model="tempData[v.key].type"
-                        label="color" @input="input">颜色
+              <el-radio v-model="tempData[v.componentAlias][v.key].type"
+                        label="color" @input="input(v)">颜色
               </el-radio>
-              <el-radio v-model="tempData[v.key].type"
-                        label="img" @input="input">图片
+              <el-radio v-model="tempData[v.componentAlias][v.key].type"
+                        label="img" @input="input(v)">图片
               </el-radio>
-              <el-radio v-model="tempData[v.key].type"
-                        label="video" @input="input">视频
+              <el-radio v-model="tempData[v.componentAlias][v.key].type"
+                        label="video" @input="input(v)">视频
               </el-radio>
 
 
-              <el-input v-if="tempData[v.key].type==='video'" v-model="tempData[v.key].video" @input="input"></el-input>
-              <el-input v-else-if="tempData[v.key].type==='img'" v-model="tempData[v.key].img" @input="input"></el-input>
-              <el-input v-else-if="tempData[v.key].type==='color'" v-model="tempData[v.key].color" @input="input"></el-input>
+              <el-input v-if="tempData[v.componentAlias][v.key].type==='video'"
+                        v-model="tempData[v.componentAlias][v.key].video"
+                        @input="input(v)"></el-input>
+              <el-input v-else-if="tempData[v.componentAlias][v.key].type==='img'"
+                        v-model="tempData[v.componentAlias][v.key].img"
+                        @input="input(v)"></el-input>
+              <el-input v-else-if="tempData[v.componentAlias][v.key].type==='color'"
+                        v-model="tempData[v.componentAlias][v.key].color"
+                        @input="input(v)"></el-input>
             </div>
             <div v-else-if="v.type==='enum'">
               <el-radio
                 v-for="i in v.options"
                 :key="i.label"
-                v-model="tempData[v.key]"
-                :label="i.value" @input="input">{{i.label}}
+                v-model="tempData[v.componentAlias][v.key]"
+                :label="i.value" @input="input(v)">{{i.label}}
               </el-radio>
             </div>
             <div v-else-if="v.type==='bool'">
               <el-radio
                 v-for="i in [true,false]"
                 :key="i"
-                v-model="tempData[v.key]"
-                :label="i" @input="input">{{i.label}}
+                v-model="tempData[v.componentAlias][v.key]"
+                :label="i" @input="input(v)">{{i.label}}
               </el-radio>
             </div>
           </div>
@@ -87,49 +93,62 @@
     props: [],
     data() {
       return {
-        tempData: {},
-        oldData: {},
+        tempData: {}, // 保存各个别名组件下的修改数据
         active: false,
         bg: {},
         showMask: false,// 是否显示遮罩层, 在修改了任何元素就显示
 
-        top: 0,
+        editedItems: {}, // 这个编辑器影响的所有组件的初始状态, 用于重置, 和与tempData融合出新属性.
 
+        config: {}, // 配置项
+        title: '', // 标题
+        layout: {}, // 考虑到父组件只会影响到子组件, 所以在按别名查找组件的时候只会遍历在这个layout下的组件.
+        onInput: null, // 当某个组件改变了之后
+        onSave: null, // 当组件保存
+        onClose: null, // 当编辑框关闭
+        onOpen: null, // 当编辑框打开
 
-        config: {},
-        title: '',
-        data: {},
-        onInput: null,
-        onSave: null,
-        onClose: null,
-        onOpen: null,
+        itemChangedAlias: {}, // 改变过的组件的别名, 在保存的时候只更新改变过的.
       }
     },
     methods: {
-      input() {
+      input(config) {
         // 这里settimeout是因为在部分控件触发@input="input"的时候, v-model还没来得及改变
         setTimeout(() => {
-          let x = this.tranDataZ(this.oldData, this.tempData)
+          let src = this.editedItems[config.componentAlias]
+          let editData = this.tempData[config.componentAlias]
+
+          let x = this.tranDataZ(src, editData)
           this.onInput && this.onInput(x)
 
           this.showMask = true
+          this.itemChangedAlias[config.componentAlias] = true
         }, 10)
+
+
       },
       save() {
-        let x = this.tranDataZ(this.oldData, this.tempData)
+        for (let alias in this.itemChangedAlias) {
+          let src = this.editedItems[alias]
+          let editData = this.tempData[alias]
+
+          let x = this.tranDataZ(src, editData)
+          this.onSave && this.onSave(x)
+        }
 
         this.active = false
-        this.onSave && this.onSave(x)
         this.afterClose()
       },
       reset() {
-        this.onInput && this.onInput(_.cloneDeep(this.oldData))
+        for (let alias in this.editedItems) {
+          let i = this.editedItems[alias]
+          this.onInput && this.onInput(_.cloneDeep(i))
+        }
         this.showMask = false
       },
       close() {
-        this.onInput && this.onInput(this.oldData)
+        this.reset()
         this.active = false
-        this.showMask = false
 
         this.$nextTick(this.afterClose)
       },
@@ -158,32 +177,37 @@
         this.onClose && this.onClose()
 
       },
-      tranData(x) {
+      tranData(config, editItems) {
         let y = {}
 
-        this.config.forEach((v)=>{
+        config.forEach((v) => {
+          if (!y[v.componentAlias]) {
+            y[v.componentAlias] = {}
+          }
           try {
-            y[v.key] = eval('x.' + v.key)
+            let x = editItems[v.componentAlias]
+            y[v.componentAlias][v.key] = eval('x.' + v.key)
           } catch (e) {
             // 需要给属性赋值上默认值, 才能实现数据响应式
             switch (v.type) {
               case 'background':
-                y[v.key] = {}
+                y[v.componentAlias][v.key] = {}
                 break
               default:
-                y[v.key] = null
+                y[v.componentAlias][v.key] = null
             }
           }
         })
 
         return y
       },
-      tranDataZ(base, src) {
+      tranDataZ(base, modify) {
         let x = _.cloneDeep(base)
-        this.config.forEach((v)=>{
-          this.setValue(x, v.key, src[v.key])
 
-        })
+        for (let k in modify) {
+          let v = modify[k]
+          this.setValue(x, k, v)
+        }
 
         return x
       },
@@ -210,21 +234,62 @@
           t = t[i]
         })
       },
-    },
-    watch: {
-      'data'() {
-        this.tempData = this.tranData(this.data)
+
+      // 获取config能影响到所有子组件
+      // alias => item
+      getEditItems(items, layout, config) {
+        let alias = []
+
+        let editItems = {}
+        config.forEach((c) => {
+          if (c.componentAlias !== 'default') {
+            alias.push(c.componentAlias)
+          } else {
+            // 别名是default则说明是自己
+            editItems['default'] = _.cloneDeep(items[layout.i])
+          }
+        })
+
+        let collectLayoutAlias = (l) => {
+          let item = items[l.i]
+          if (!item) {
+            return
+          }
+
+          // 别名一样
+          if (alias.indexOf(items[l.i].alias) !== -1) {
+            editItems[items[l.i].alias] = _.cloneDeep(items[l.i])
+          }
+
+          if (l.c) {
+            l.c.forEach((i) => {
+              collectLayoutAlias(i)
+            })
+          }
+        }
+
+        collectLayoutAlias(layout)
+
+        return editItems
+
       }
     },
+    watch: {},
     created() {
       // 将当前数据copy一份
 
-      bus.$on(event.EditorBoxOpen, ({data, config, onClose,onOpen, onInput, onSave, title}) => {
+      bus.$on(event.EditorBoxOpen, ({layout, items, config, onInput, onClose, onOpen, onSave, title}) => {
+        // 关闭之前的
         this.onClose && this.onClose()
 
         this.active = true
 
-        this.data = data
+        config.forEach((c) => {
+          if (!c.componentAlias) {
+            c.componentAlias = 'default'
+          }
+        })
+
         this.config = config
         this.onInput = onInput
         this.onSave = onSave
@@ -232,8 +297,10 @@
         this.onClose = onClose
         this.onOpen = onOpen
 
-        this.oldData = _.cloneDeep(this.data)
-        this.tempData = this.tranData(this.data)
+
+        this.editedItems = this.getEditItems(items, layout, config)
+        this.tempData = this.tranData(this.config, this.editedItems)
+        this.itemChangedAlias = {}
 
         this.$nextTick(this.afterOpen)
 

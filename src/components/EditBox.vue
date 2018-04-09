@@ -289,8 +289,19 @@
             c.componentAlias = 'default'
           }
         })
+        this.editedItems = this.getEditItems(items, layout, config)
 
-        this.config = config
+        let tempConfig = []
+        // 如果没找到config指定的别名, 那么config里的当前别名配置项也不应该出现. 并且报一个警告
+        config.forEach((c) => {
+          if (!this.editedItems[c.componentAlias]) {
+            console.warn("can't found any children that alias is "+c.componentAlias+"")
+            return
+          }
+          tempConfig.push(c)
+        })
+
+        this.config = tempConfig
         this.onInput = onInput
         this.onSave = onSave
         this.title = title
@@ -298,7 +309,6 @@
         this.onOpen = onOpen
 
 
-        this.editedItems = this.getEditItems(items, layout, config)
         this.tempData = this.tranData(this.config, this.editedItems)
         this.itemChangedAlias = {}
 

@@ -6,7 +6,6 @@
 </template>
 
 <script>
-  import {bus, event} from '../util/event_bus'
 
   export default {
     name: 'Editor',
@@ -140,11 +139,11 @@
         }
       }
 
-//      this.params = layout
+     this.params = layout
 
-      this.axios.get("/v1/page/layout?id=1").then(({data}) => {
-        this.params = data
-      })
+      // this.axios.get("/v1/page/layout?id=1").then(({data}) => {
+      //   this.params = data
+      // })
 
       // setTimeout(() => {
       //   this.$css.save()

@@ -19,37 +19,40 @@
           </div>
         </div>
         <div class="body">
-          <div v-for="(v,k) in config">
+          <div v-for="(v) in config">
             <label>{{v.label}}</label>
             <div v-if="v.type==='fullText'">
               <el-input type="textarea"
                         :rows="4"
-                        v-model="tempData[k]" @input="input"></el-input>
+                        v-model="tempData[v.key]" @input="input"></el-input>
+            </div>
+            <div v-else-if="v.type==='text'">
+              <el-input v-model="tempData[v.key]" @input="input"></el-input>
             </div>
             <div v-else-if="v.type==='color'">
-              <el-input v-model="tempData[k]" @input="input"></el-input>
+              <el-input v-model="tempData[v.key]" @input="input"></el-input>
             </div>
             <div v-else-if="v.type==='background'">
-              <el-radio v-model="tempData[k].type"
+              <el-radio v-model="tempData[v.key].type"
                         label="color" @input="input">颜色
               </el-radio>
-              <el-radio v-model="tempData[k].type"
+              <el-radio v-model="tempData[v.key].type"
                         label="img" @input="input">图片
               </el-radio>
-              <el-radio v-model="tempData[k].type"
+              <el-radio v-model="tempData[v.key].type"
                         label="video" @input="input">视频
               </el-radio>
 
 
-              <el-input v-if="tempData[k].type==='video'" v-model="tempData[k].video" @input="input"></el-input>
-              <el-input v-else-if="tempData[k].type==='img'" v-model="tempData[k].img" @input="input"></el-input>
-              <el-input v-else-if="tempData[k].type==='color'" v-model="tempData[k].color" @input="input"></el-input>
+              <el-input v-if="tempData[v.key].type==='video'" v-model="tempData[v.key].video" @input="input"></el-input>
+              <el-input v-else-if="tempData[v.key].type==='img'" v-model="tempData[v.key].img" @input="input"></el-input>
+              <el-input v-else-if="tempData[v.key].type==='color'" v-model="tempData[v.key].color" @input="input"></el-input>
             </div>
             <div v-else-if="v.type==='enum'">
               <el-radio
                 v-for="i in v.options"
                 :key="i.label"
-                v-model="tempData[k]"
+                v-model="tempData[v.key]"
                 :label="i.value" @input="input">{{i.label}}
               </el-radio>
             </div>
@@ -57,7 +60,7 @@
               <el-radio
                 v-for="i in [true,false]"
                 :key="i"
-                v-model="tempData[k]"
+                v-model="tempData[v.key]"
                 :label="i" @input="input">{{i.label}}
               </el-radio>
             </div>
@@ -131,24 +134,24 @@
         this.$nextTick(this.afterClose)
       },
       afterOpen() {
-        let bodyEl = document.body
-        if (!bodyEl.style.top) {
-          this.top = window.scrollY
-
-          bodyEl.style.position = 'fixed'
-          bodyEl.style.top = -this.top + 'px'
-          bodyEl.style.paddingRight = '17px'
-        }
+        // let bodyEl = document.body
+        // if (!bodyEl.style.top) {
+        //   this.top = window.scrollY
+        //
+        //   bodyEl.style.position = 'fixed'
+        //   bodyEl.style.top = -this.top + 'px'
+        //   bodyEl.style.paddingRight = '17px'
+        // }
 
         this.onOpen && this.onOpen()
       },
       afterClose() {
-        let bodyEl = document.body
-        bodyEl.style.position = ''
-        bodyEl.style.top = ''
-        bodyEl.style.paddingRight = ''
-
-        window.scrollTo(0, this.top) // 回到原先的top
+        // let bodyEl = document.body
+        // bodyEl.style.position = ''
+        // bodyEl.style.top = ''
+        // bodyEl.style.paddingRight = ''
+        //
+        // window.scrollTo(0, this.top) // 回到原先的top
 
         this.showMask = false
 
@@ -158,35 +161,29 @@
       tranData(x) {
         let y = {}
 
-        for (let k in this.config) {
-          if (!this.config.hasOwnProperty(k)) {
-            continue
-          }
-          let v = this.config[k]
+        this.config.forEach((v)=>{
           try {
-            y[k] = eval('x.' + k)
+            y[v.key] = eval('x.' + v.key)
           } catch (e) {
             // 需要给属性赋值上默认值, 才能实现数据响应式
             switch (v.type) {
               case 'background':
-                y[k] = {}
+                y[v.key] = {}
                 break
               default:
-                y[k] = null
+                y[v.key] = null
             }
           }
-        }
+        })
 
         return y
       },
       tranDataZ(base, src) {
         let x = _.cloneDeep(base)
-        for (let k in this.config) {
-          if (!this.config.hasOwnProperty(k)) {
-            continue
-          }
-          this.setValue(x, k, src[k])
-        }
+        this.config.forEach((v)=>{
+          this.setValue(x, v.key, src[v.key])
+
+        })
 
         return x
       },
@@ -222,7 +219,7 @@
     created() {
       // 将当前数据copy一份
 
-      bus.$on(event.EditorBox, ({data, config, onClose,onOpen, onInput, onSave, title}) => {
+      bus.$on(event.EditorBoxOpen, ({data, config, onClose,onOpen, onInput, onSave, title}) => {
         this.onClose && this.onClose()
 
         this.active = true

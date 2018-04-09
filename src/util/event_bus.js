@@ -8,7 +8,7 @@ const event = {
   ItemAdded: 'IA:', //
   ItemRemove: 'IR:', //
   LayoutChanged: 'LC:', // layout改变了, body{layout:[]}. 在一个布局器中使用, 这个key后需要跟上布局器id
-  EditorBox: 'EB', // layout改变了, body{layout:[]}. 在一个布局器中使用, 这个key后需要跟上布局器id
+  EditorBoxOpen: 'EB', // 打开editorBox
 }
 
 export {

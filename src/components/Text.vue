@@ -10,10 +10,6 @@
 </template>
 
 <script>
-  // 组件上需要data-comp属性标记它是一个组件, 方便在点击事件时激活它
-  //  'data', // 整个组件的数据
-  //    'style', // 样式, 可自定义或者原生属性
-  //    'methods', // 用户自定义事件(js)
 
   import mixin from '../base/mixin.js'
   import {bus, event} from '../util/event_bus'
@@ -29,32 +25,33 @@
     data() {
       return {
         active: false,
-        editConfig: {
-          'data.text': {
+        editConfig: [
+          {
+            key: 'data.text',
             label: '文本',
             type: 'fullText'
-          },
-          'design.advanced.background': {
+          }, {
+            key: 'design.advanced.background',
             label: '背景',
             type: 'background'
-          },
-          'design.css["padding"]': {
+          }, {
+            key: 'design.css["padding"]',
             label: 'padding',
-            type: 'color'
-          },
-          'design.css["margin"]': {
+            type: 'text'
+          }, {
+            key: 'design.css["margin"]',
             label: 'margin',
-            type: 'color'
-          },
-          'design.css["color"]': {
+            type: 'text'
+          }, {
+            key: 'design.css["color"]',
             label: '字体颜色',
             type: 'color'
-          },
-          'design.css["&:hover"].color': {
+          }, {
+            key: 'design.css["&:hover"].color',
             label: 'hover字体颜色',
             type: 'color'
-          },
-          'design.model.shape': {
+          }, {
+            key: 'design.model.shape',
             label: '形状',
             type: 'enum',
             options: [{
@@ -64,22 +61,19 @@
               label: '圆形',
               value: 'o',
             }]
-          },
-        },
-
+          }
+        ],
       }
     },
-    computed: {
-
-    },
+    computed: {},
     methods: {
       click(e) {
-        bus.$emit(event.EditorBox,{
-          data:this.item,
-          config:this.editConfig,
-          onInput:this.onEdit,
-          onSave:this.onSave,
-          title:'text',
+        bus.$emit(event.EditorBoxOpen, {
+          data: this.item,
+          config: this.editConfig,
+          onInput: this.onEdit,
+          onSave: this.onSave,
+          title: 'text',
         })
 
 //        this.active = true

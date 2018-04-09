@@ -63,18 +63,19 @@
 
     data() {
       return {
-        editConfig: {
-          'data.center': {
+        editConfig: [
+          {
+            key: 'data.center',
             label: '居中',
             type: 'bool'
           },
-        },
+        ],
       }
     },
     computed: {},
     methods: {
       click(e) {
-        bus.$emit(event.EditorBox, {
+        bus.$emit(event.EditorBoxOpen, {
           data: this.item,
           config: this.editConfig,
           onInput: this.onInput,

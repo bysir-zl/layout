@@ -29,7 +29,6 @@
 <script>
   import mixin from '../base/mixin.js'
   import {bus, event} from '../util/event_bus'
-  import util from '../util'
 
   // data:{widths:[4]}
   export default {
@@ -43,8 +42,9 @@
       return {
         active: false,
         preActive: false,
-        editConfig: {
-          'data.widths': {
+        editConfig: [
+          {
+            key: 'data.widths',
             label: '列数',
             type: 'enum',
             options: [{
@@ -55,7 +55,7 @@
               value: ['', ''],
             }]
           },
-        },
+        ],
         openPin: false,
       }
     },
@@ -69,8 +69,7 @@
     },
     methods: {
       click(e) {
-        this.active = true
-        bus.$emit(event.EditorBox, {
+        bus.$emit(event.EditorBoxOpen, {
           data: this.item,
           config: this.editConfig,
           onInput: this.onEdit,

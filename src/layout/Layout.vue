@@ -2,10 +2,11 @@
 
 <template>
   <div :id="'layout-'+params.id">
-    <component v-if="params.items[params.layout.i]"
-               :is="params.items[params.layout.i].type"
-               :params="{id:params.id,items:params.items,layout:params.layout}"
-               :root="this"></component>
+    <component
+      v-if="params.items[params.layout.i]"
+      :is="params.items[params.layout.i].type"
+      :params="{id:params.id,items:params.items,layout:params.layout}"
+      :root="this"></component>
   </div>
 </template>
 
@@ -57,24 +58,8 @@
 
         })
       },
-      init() {
-
-      }
     },
     mounted() {
-      this.init()
-    },
-    watch: {
-      params(n, o) {
-        // 为何不用computed属性?
-        //  computed属性不会给对象生成getset, 所以不会有响应式.
-        //  如果直接赋值就会自动给对象生成getset
-        //  有点不优雅, 考虑一下?
-        bus.$off(event.ItemChanged + o.id)
-        bus.$off(event.LayoutChanged + o.id)
-
-        this.init()
-      }
     }
   }
 </script>

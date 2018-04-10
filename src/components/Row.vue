@@ -13,20 +13,18 @@
         <add :index="index" @add="add"></add>
         <template v-if="params.items[layout.i]">
           <!--如果是布局组件，则使用布局组件的布局-->
-          <component
+          <layout
             v-if="params.items[layout.i].type==='layout'"
-            :is="params.items[layout.i].type"
             :params="params.items[layout.i]"
-            :root="root"
-            @remove="remove(layout.i)">
-          </component>
+            @remove="remove(index)">
+          </layout>
           <!--否则就使用由上到下继承下来的布局-->
           <component
             v-else
             :is="params.items[layout.i].type"
             :params="{id:layout.i,items:params.items,layout:layout}"
             :root="root"
-            @remove="remove(layout.i)">
+            @remove="remove(index)">
           </component>
 
         </template>
@@ -84,10 +82,10 @@
     methods: {
       click(e) {
         bus.$emit(event.EditorBoxOpen, {
-          items:this.params.items,
-          layout:this.params.layout,
+          items: this.params.items,
+          layout: this.params.layout,
           config: this.editConfig,
-          onInput:(s)=>{
+          onInput: (s) => {
             Vue.set(this.params.items, s.id, s)
           },
           onSave: (s) => {
@@ -102,16 +100,12 @@
       onSave(s) {
         this.item = s
       },
-      remove(id) {
-        let index = _.findIndex(this.params.children, i => i.data.id === id)
-        if (index >= 0) {
-          this.params.children.splice(index, 1)
-        }
+      remove(index) {
+        this.params.children.splice(index, 1)
 
-        bus.$emit(event.LayoutChanged + this.data._layoutId)
+        this.root.updateLayout()
       },
       add({index, item}) {
-
         // 异步请求并更新id
         let post = _.cloneDeep(item.data)
         post.id = 0

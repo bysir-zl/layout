@@ -1,7 +1,7 @@
 <!--列组件, 也就是横向布局容器-->
 <template>
   <div class="self show-border editor-padding" :style="style" :class="classes">
-    <div class="pin" @click="click" @mouseenter="mouseenter" @mouseleave="mouseleave">
+    <div class="pin" @click="click" @mouseenter="mouseenter" @mouseleave="mouseleave"  @dragstart="dragstart">
       <span class="pin-icon">
         <span v-if="active || preActive" class="pin-name">col</span>
       </span>
@@ -82,6 +82,9 @@
           },
           title: 'text',
         })
+      },
+      dragstart(e) {
+        this.$emit("dragstart",e)
       },
       mouseenter() {
         this.preActive = true

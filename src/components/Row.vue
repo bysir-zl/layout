@@ -3,14 +3,14 @@
 
 <template>
   <div :id="'item-'+params.layout.i" data-type="row" :style="style" :class="classes"
-       class="self show-border editor-padding">
+       class="self show-border editor-padding"  @dragstart="ondragstart">
     <span class="pin" @click="click"></span>
     <div v-if="!params.layout.c || params.layout.c.length===0" class="placeholder">
       <add :index="0" @add="add"></add>
     </div>
     <template v-else>
       <div v-for="(layout, index) in params.layout.c" :key="layout.i">
-        <add :index="index" @add="add"></add>
+        <add :index="index" @add="add" @drop="drop(index)"></add>
         <template v-if="params.items[layout.i]">
           <!--如果是布局组件，则使用布局组件的布局-->
           <layout
@@ -24,7 +24,8 @@
             :is="params.items[layout.i].type"
             :params="{id:layout.i,items:params.items,layout:layout}"
             :root="root"
-            @remove="remove(index)">
+            @remove="remove(index)"
+            draggable="true" @dragstart="dragstart(index)">
           </component>
 
         </template>
@@ -33,7 +34,7 @@
         </span>
 
       </div>
-      <add :index="params.layout.c.length" @add="add"></add>
+      <add :index="params.layout.c.length" @add="add" @drop="drop(params.layout.c.length)"></add>
     </template>
 
   </div>
@@ -96,6 +97,11 @@
         })
 
       },
+      ondragstart(e) {
+        e.preventDefault();
+        e.stopPropagation()
+        this.$emit("dragstart",e)
+      },
 
       onSave(s) {
         this.item = s
@@ -114,7 +120,21 @@
           this.params.layout.c.splice(index, 0, {i: i.id, c: []})
           this.root.updateLayout()
         })
+      },
+      dragstart(index) {
+        console.log(this.params.layout.i)
+        window.drag = {layout: this.params.layout, index: index}
+      },
+      drop(index) {
+        console.log(this.params.layout.i)
+        if (window.drag) {
+          let item = window.drag.layout.c[window.drag.index]
+          window.drag.layout.c.splice(window.drag.index, 1)
 
+          this.params.layout.c.splice(index, 0, item)
+        }
+
+        window.drag = null
       },
       '$class'() {
         if (this.item.data && this.item.data.center) {

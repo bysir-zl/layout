@@ -1,5 +1,6 @@
 <template>
-  <div class="add " :class="{'add-open':open}">
+  <div class="add " :class="{'add-open':open,'drop':isOnDrop}" @drop="drop" @dragenter="dragenter" @dragover="dragover"
+       @dragleave="dragleave">
     <div v-if="!open" class="hover">
       <div class="line"></div>
       <span class="tips" @click="doOpen">点我添加东西</span>
@@ -19,10 +20,9 @@
           </div>
         </div>
         <div class="body">
-
-        <span @click="add({type: 'row'})">添加行</span>
-        <span @click="add({type: 'column',data:{widths:['','','']}})">添加列</span>
-        <span @click="add({type:'z-text',data:{text:'点击编辑'}})">添加文本</span>
+          <span @click="add({type: 'row'})">添加行</span>
+          <span @click="add({type: 'column',data:{widths:['','','']}})">添加列</span>
+          <span @click="add({type: 'z-text',data:{text:'点击编辑'}})">添加文本</span>
         </div>
       </div>
     </div>
@@ -43,6 +43,7 @@
     data() {
       return {
         open: false,
+        isOnDrop: false,
       }
     },
     methods: {
@@ -65,9 +66,27 @@
         item.id = util.genId()
 
         let d = {id: item.id, type: item.type, data: item, children: []}
-        this.$emit('add', {index:this.index,item:d})
+        this.$emit('add', {index: this.index, item: d})
         this.close()
-      }
+      },
+      dragenter(e) {
+        e.preventDefault()
+      },
+      dragover(e) {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = "move"
+        this.isOnDrop = true
+      },
+      dragleave(e) {
+        e.preventDefault()
+        this.isOnDrop = false
+      },
+      drop(e) {
+        e.preventDefault();
+        this.isOnDrop = false
+
+        this.$emit("drop",e)
+      },
     },
     computed: {
       data() {
@@ -90,7 +109,7 @@
     position: relative;
     margin-bottom: -6px;
     margin-top: -6px;
-    .hover{
+    .hover {
       text-align: center;
       .line {
         position: absolute;
@@ -99,7 +118,7 @@
         background-color: #111;
         height: 6px;
         border-radius: 2px;
-        pointer-events: none;
+        /*pointer-events: none;*/
       }
       .tips {
         cursor: pointer;
@@ -115,7 +134,9 @@
         border-radius: 2px;
       }
     }
-
+    &.drop {
+      opacity: 1;
+    }
 
     &:hover {
       opacity: 1;
@@ -156,10 +177,10 @@
     }
   }
 
-  .add-placeholder-warp{
+  .add-placeholder-warp {
     margin: 5px 0;
     /*background-color: #111;*/
-    .add-placeholder{
+    .add-placeholder {
       /*border: 1px solid #64a4ff;*/
       box-shadow: 0px 0px 20px rgba(79, 101, 174, 0.15);
 

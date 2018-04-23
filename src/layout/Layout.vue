@@ -58,6 +58,9 @@
 
         })
       },
+      dragStart(item,){
+
+      }
     },
     mounted() {
     }

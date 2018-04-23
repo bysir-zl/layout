@@ -1,5 +1,5 @@
 <template>
-  <div class="self" data-comp="text" :id="'item-'+item.id">
+  <div class="self" data-comp="text" :id="'item-'+item.id" @dragstart="dragstart">
     <div class="data" :style="style" :class="classes" @click="click">
       <div v-html="item.data.text"></div>
       <video v-if="item.design&&item.design.advanced.background&&item.design.advanced.background.type === 'video'"
@@ -70,10 +70,10 @@
     methods: {
       click(e) {
         bus.$emit(event.EditorBoxOpen, {
-          items:this.params.items,
-          layout:this.params.layout,
+          items: this.params.items,
+          layout: this.params.layout,
           config: this.editConfig,
-          onInput:(s)=>{
+          onInput: (s) => {
             Vue.set(this.params.items, s.id, s)
           },
           onSave: (s) => {
@@ -94,7 +94,10 @@
 //          this.active = false
 //        })
       },
-
+      dragstart(e) {
+        this.$emit("dragstart",e)
+        e.stopPropagation()
+      },
 
       '$class'() {
         if (!this.item.design) {
